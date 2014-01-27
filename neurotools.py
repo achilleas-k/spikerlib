@@ -1,4 +1,4 @@
-from brian import *
+from brian import *  # remove brian dependency - make optional and explicit
 from pickle import load
 import os
 from numpy import (array, diff, floor, zeros, log, mean, std, shape,
