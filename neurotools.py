@@ -212,7 +212,7 @@ def _run_calib(nrndef, N_in, f_in, w_in, input_configs, active_idx):
     clear(True)
     gc.collect()
     eqs = nrndef['eqs']
-    V_th = nrndef['V_th']
+    #V_th = nrndef['V_th']
     refr = nrndef['refr']
     reset = nrndef['reset']
     nrngrp = NeuronGroup(len(input_configs), eqs, threshold='V>V_th',
@@ -433,9 +433,9 @@ def plot_slope_bounds(spiketrain, v0, vr, vth, tau, dt):
     plot(times, high_bound, times, low_bound)
 
 
-def pre_spike_slopes(mem, spiketrain, vth, w, dt=0.1*ms):
-    duration = spiketrain[-1]
-    duration_dt = int(duration/dt)
+def pre_spike_slopes(mem, spiketrain, vth, w, dt=0.1*msecond):
+    #duration = spiketrain[-1]
+    #duration_dt = int(duration/dt)
     spiketrain_dt = (spiketrain/dt).astype(int)
     w_dt = int(w/dt)
     pre_spike_mem = mem[spiketrain_dt-w_dt]
