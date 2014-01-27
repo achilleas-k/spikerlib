@@ -36,7 +36,7 @@ def vp(st_one, st_two, cost):
     return scr[-1,-1]
 
 
-def vp_pairwise_mean_mp(spiketrains, cost):
+def vp_pwise_mp(spiketrains, cost):
     count = len(spiketrains)
     distances = []
     idx_all = range(count - 1)
@@ -52,7 +52,7 @@ def vp_pairwise_mean_mp(spiketrains, cost):
     return np.mean(distances)
 
 
-def vp_pairwise_mean(all_spikes, cost):
+def vp_pwise(all_spikes, cost):
     count = len(all_spikes)
     distances = []
     for i in range(count - 1):
@@ -86,7 +86,7 @@ def interval_vp_st(inputspikes, outputspikes, cost, dt=0.0001):
     return vpdists
 
 
-def interval_Kr(inputspikes, outputspikes, dt=0.0001):
+def interval_kr(inputspikes, outputspikes, dt=0.0001):
     dt = float(dt)
     krdists = []
     for prv, nxt in zip(outputspikes[:-1], outputspikes[1:]):
