@@ -1,16 +1,42 @@
-from brian import *  # remove brian dependency - make optional and explicit
-from pickle import load
+from __future__ import print_function
+import sys
 import os
-from numpy import (array, diff, floor, zeros, log, mean, std, shape,
-    random, cumsum, histogram, where, arange, divide, exp, insert,
-    count_nonzero, bitwise_and, append, corrcoef)
+from pickle import load
+from numpy import (array, diff, floor, zeros, mean, std, shape,
+    random, cumsum, histogram, where, arange, divide, exp,
+    count_nonzero, bitwise_and, append, ones, flatnonzero, ndarray)
 import random as rnd
 from warnings import warn
 import gc
 
-
 # TODO: Compare gen_input_groups with SynchronousInputGroup
 # TODO: Major cleanup required
+# TODO: Put brian-dependent functions into a separate file
+
+# brian optional dependency
+try:
+    import brian
+    nobrian = False
+    units = brian.units
+    msecond = brian.msecond
+    volt = brian.volt
+    second = brian.second
+    PoissonGroup = brian.PoissonGroup
+    NeuronGroup = brian.NeuronGroup
+    Network = brian.Network
+    Connection = brian.Connection
+    PulsePacket = brian.PulsePacket
+    SpikeGeneratorGroup = brian.SpikeGeneratorGroup
+    SpikeMonitor = brian.SpikeMonitor
+    plot = brian.plot
+    clear = brian.clear
+except ImportError:
+    nobrian = True
+    msecond = 0.001
+    second = 1
+    volt = 1
+
+
 
 class SynchronousInputGroup:
     '''
@@ -151,6 +177,9 @@ def gen_input_groups(N_in, f_in, S_in, sigma, duration, dt=0.1*msecond):
     Generate two input groups, one for synchronous spikes and the other for
     random (Poisson), independent spiking.
     """
+    if nobrian:
+        print("Error: gen_input_groups requires Brian", file=sys.stderr)
+        return None, None
     N_sync = int(N_in*S_in)
     N_rand = N_in-N_sync
     syncGroup = PoissonGroup(0, 0)  # dummy nrngrp
@@ -194,7 +223,6 @@ def _run_calib(nrndef, N_in, f_in, w_in, input_configs, active_idx):
     calib_network = Network(nrngrp)
     syncConns = []
     randConns = []
-    print active_idx
     active_configs = array(input_configs)[active_idx]
     for idx, (sync, jitter) in zip(active_idx, active_configs):
         sg, rg = gen_input_groups(N_in, f_in[idx], sync, jitter, calib_duration)
@@ -232,7 +260,12 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
     Calculates the input frequency required to produce the desired output rate
     by assuming a linear relationship and iteratively updating and retesting
     the input frequency on a short simulation.
+
+    Requires Brian.
     '''
+    if nobrian:
+        print("Error: calibrate_frequencies requires Brian", file=sys.stderr)
+        return -1
     desired_out = f_out
     f_in = ones(len(input_configs))*10
     print("Testing inputs:")
@@ -410,7 +443,7 @@ def pre_spike_slopes(mem, spiketrain, vth, w, dt=0.1*ms):
     return pre_spike_slopes
 
 
-def normalised_pre_spike_slopes(mem, spiketrain, v0, vth, tau, w, dt=0.1*ms):
+def normalised_pre_spike_slopes(mem, spiketrain, v0, vth, tau, w, dt=0.1*msecond):
     first_spike = spiketrain[0]
     first_spike_dt = int(first_spike/dt)
     vr = mem[first_spike_dt+1]*volt  # reset potential
