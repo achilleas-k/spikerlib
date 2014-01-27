@@ -1,9 +1,9 @@
 from brian import *
 from pickle import load
 import os
-from numpy import array, diff, floor, zeros, log, mean, std, shape, \
-    random, cumsum, histogram, where, arange, divide, exp, insert, \
-    count_nonzero, bitwise_and, append, corrcoef
+from numpy import (array, diff, floor, zeros, log, mean, std, shape,
+    random, cumsum, histogram, where, arange, divide, exp, insert,
+    count_nonzero, bitwise_and, append, corrcoef)
 import random as rnd
 from warnings import warn
 import gc
