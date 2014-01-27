@@ -89,7 +89,7 @@ def _all_dist_to_end(args):
     return distances
 
 
-def interval_vp_st(inputspikes, outputspikes, cost, dt=0.0001, mp=True):
+def interval_vp(inputspikes, outputspikes, cost, dt=0.0001, mp=True):
     '''
     Calculates the mean pairwise spike time distance in intervals defined
     by a separate spike train. This function is used to calculate the distance
@@ -130,6 +130,12 @@ def interval_vp_st(inputspikes, outputspikes, cost, dt=0.0001, mp=True):
 '''
 Kreuz SPIKE-distance
 Kreuz, Chicharro, Greschner, Andrzejak, 2011, Journal of Neuroscience Methods.
+and
+Kreuz T, Chicharro D, Houghton C, Andrzejak RG, Mormann F, 2013,
+Journal of Neurophysiology.
+
+Everything related to the SPIKE-distance, except the `interval_kr` function
+were taken from the website mentioned in the comment below.
 
 
 Comment by Thomas Kreuz:
