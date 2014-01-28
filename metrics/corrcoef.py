@@ -2,7 +2,7 @@
 Correlation coefficient between binned spike trains.
 '''
 import numpy as np
-from ..neurotools import times_to_bin_multi
+from ..tools import times_to_bin_multi
 
 
 def corrcoef_spiketrains(spikes, b=0.001, duration=None):
