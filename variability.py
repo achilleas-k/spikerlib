@@ -1,4 +1,10 @@
-import numpy as __np
+"""
+Variability metrics commonly used for measuring neural spiking variability
+(CV, CV2, LV, IR).
+
+TODO: List functions and classes and finish docstrings.
+"""
+import numpy as np
 
 
 def CV(spiketrain):
@@ -18,12 +24,12 @@ def CV(spiketrain):
 
     '''
 
-    isi = __np.diff(spiketrain)
+    isi = np.diff(spiketrain)
     if len(isi) == 0:
         return 0.0
 
-    avg_isi = __np.mean(isi)
-    std_isi = __np.std(isi)
+    avg_isi = np.mean(isi)
+    std_isi = np.std(isi)
     return std_isi/avg_isi
 
 
@@ -44,7 +50,7 @@ def CV2(spiketrain):
 
     '''
 
-    isi = __np.diff(spiketrain)
+    isi = np.diff(spiketrain)
     N = len(isi)
     if (N == 0):
         return 0
@@ -74,16 +80,16 @@ def IR(spiketrain):
 
 
 
-    isi = __np.diff(spiketrain)
+    isi = np.diff(spiketrain)
     N = len(isi)
     if (N == 0):
         return 0
 
     mi_total = 0
     for i in range(N-1):
-        mi_total = mi_total + abs(__np.log(isi[i]/isi[i+1]))
+        mi_total = mi_total + abs(np.log(isi[i]/isi[i+1]))
 
-    return mi_total*1/(N*__np.log(4))
+    return mi_total*1/(N*np.log(4))
 
 
 def LV(spiketrain):
@@ -104,7 +110,7 @@ def LV(spiketrain):
     '''
 
 
-    isi = __np.diff(spiketrain)
+    isi = np.diff(spiketrain)
     N = len(isi)
     if (N == 0):
         return 0
@@ -133,14 +139,14 @@ def SI(spiketrain):
     '''
 
 
-    isi = __np.diff(spiketrain)
+    isi = np.diff(spiketrain)
     N = len(isi)
     if (N == 0):
         return 0
 
     mi_sum = 0
     for i in range(N-1):
-        mi_sum = mi_sum + __np.log(4*isi[i]*isi[i+1]/((isi[i]+isi[i+1])**2))
+        mi_sum = mi_sum + np.log(4*isi[i]*isi[i+1]/((isi[i]+isi[i+1])**2))
 
-    return -1./(2*N*(1-__np.log(2)))*mi_sum
+    return -1./(2*N*(1-np.log(2)))*mi_sum
 

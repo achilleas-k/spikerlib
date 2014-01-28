@@ -1,3 +1,11 @@
+"""
+General purpose tools. Some of the functions in this submodule
+depend on Brian (http://briansimulator.org) to work, as they
+are used to generate inputs or run simulations using the
+simulator.
+
+TODO: List functions and classes and finish docstrings.
+"""
 from __future__ import print_function
 import sys
 import os
