@@ -5,7 +5,7 @@ and
 Kreuz T, Chicharro D, Houghton C, Andrzejak RG, Mormann F, 2013,
 Journal of Neurophysiology.
 
-All function relating to the SPIKE-distance, except the `interval_kr` function
+All function relating to the SPIKE-distance, except the `interval` function
 were taken from the website mentioned in the comment below.
 
 
