@@ -142,7 +142,7 @@ def multivariate_spike_distance(spike_trains, ti, te, N):
     return t,d
 
 
-def interval(inputspikes, outputspikes, dt=0.0001):
+def interval(inputspikes, outputspikes):
     '''
     Calculates the mean pairwise SPIKE-distance in intervals defined
     by a separate spike train. This function is used to calculate the distance
@@ -156,13 +156,10 @@ def interval(inputspikes, outputspikes, dt=0.0001):
     outputspikes    - A single spike train to be used to calculate the
                     intervals
 
-    dt              - The simulation time step (default: 0.0001)
-
     '''
-    dt = float(dt)
     krdists = []
     for prv, nxt in zip(outputspikes[:-1], outputspikes[1:]):
-        krd = multivariate_spike_distance(inputspikes, prv, nxt+dt, 1)
+        krd = multivariate_spike_distance(inputspikes, prv, nxt, 1)
         krdists.append(krd[1])
     return krdists
 
