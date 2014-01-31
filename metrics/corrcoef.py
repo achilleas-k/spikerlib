@@ -29,10 +29,16 @@ def interval_corr(inputspikes, outputspikes, b=0.001, duration=None):
     outputspikes    - A single spike train to be used to calculate the
                     intervals
 
-    dt              - The simulation time step (default: 0.0001)
+    b               - Bin width
+
+    duration        - Duration of the simulation or spike train
+                        (defaults to last input or output spike)
 
     '''
     b = float(b)
+    if duration is None:
+        duration = max(max(t) for t in inputspikes)
+        duration = max((duration, max(outputspikes)))
     corrs = []
     for prv, nxt in zip(outputspikes[:-1], outputspikes[1:]):
         interval_inputs = []
