@@ -15,7 +15,7 @@ def corrcoef_spiketrains(spikes, b=0.001, duration=None):
     return correlations
 
 
-def interval_corr(inputspikes, outputspikes, b=0.001, duration=None):
+def interval(inputspikes, outputspikes, b=0.001, duration=None):
     '''
     Calculates the mean pairwise correlation coefficient in intervals defined
     by a separate spike train. This function is used to calculate the
