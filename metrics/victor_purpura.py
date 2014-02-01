@@ -1,14 +1,14 @@
-'''
+"""
 Victor-Purpura spike time distance metric
 Victor and Purpura, 1996, Journal of Neurophysiology
-'''
+"""
 import numpy as np
 import multiprocessing
 import itertools
 
 
 def distance(st_one, st_two, cost):
-    '''
+    """
     Calculates the "spike time" distance (Victor & Purpura, 1996) for a single
     cost.
 
@@ -17,7 +17,7 @@ def distance(st_one, st_two, cost):
     cost    - cost per unit time to move a spike
 
     Translated to Python by Achilleas Koutsou from Matlab code by Daniel Reich.
-    '''
+    """
     len_one = len(st_one)
     len_two = len(st_two)
     if cost == 0:
@@ -40,13 +40,12 @@ def distance(st_one, st_two, cost):
 
 
 def pairwise_mp(spiketrains, cost):
-    '''
+    """
     Calculates the average pairwise distance between a set of spike trains.
     Uses Python's multiprocessing.Pool() to run each pairwise distance
     calculation in parallel.
-    '''
+    """
     count = len(spiketrains)
-    distances = []
     idx_all = range(count - 1)
     pool = multiprocessing.Pool()
     distances_nested = pool.map(_all_dist_to_end,
@@ -61,9 +60,9 @@ def pairwise_mp(spiketrains, cost):
 
 
 def pairwise(all_spikes, cost):
-    '''
+    """
     Calculates the average pairwise distance between a set of spike trains.
-    '''
+    """
     count = len(all_spikes)
     distances = []
     for i in range(count - 1):
@@ -74,9 +73,9 @@ def pairwise(all_spikes, cost):
 
 
 def _all_dist_to_end(args):
-    '''
+    """
     Helper function for parallel pairwise distance calculations.
-    '''
+    """
     idx = args[0]
     spiketrains = args[1]
     cost = args[2]
@@ -88,39 +87,34 @@ def _all_dist_to_end(args):
     return distances
 
 
-def interval(inputspikes, outputspikes, cost, dt=0.0001, mp=True):
-    '''
+def interval(inputspikes, outputspikes, cost, mp=True):
+    """
     Calculates the mean pairwise spike time distance in intervals defined
     by a separate spike train. This function is used to calculate the distance
     between *input* spike trains based on the interspike intervals of the
-    *output* spike train. The result is therefore the distance between the
-    input spikes that caused each response.
+    *output* spike train. The result is the distance between the input
+    spikes that caused each response.
 
-    inputspikes     - A set of spike trains whose pairwise distance will be
+    inputspikes     A set of spike trains whose pairwise distance will be
                     calculated
 
-    outputspikes    - A single spike train to be used to calculate the
+    outputspikes    A single spike train to be used to calculate the
                     intervals
 
-    cost            - The cost of moving a spike
+    cost            The cost of moving a spike
 
-    dt              - The simulation time step (default: 0.0001)
-
-    mp              - Set to True to use the multiprocessing implementation
+    mp              Set to True to use the multiprocessing implementation
                     of the pairwise calculation function or False to use the
                     single process version (default: True)
 
-    '''
-    dt = float(dt)
+    """
     vpdists = []
+    pairwise_func = pairwise_mp if mp else pairwise
     for prv, nxt in zip(outputspikes[:-1], outputspikes[1:]):
         interval_inputs = []
         for insp in inputspikes:
-            interval_inputs.append(insp[(prv < insp) & (insp < nxt+dt)])
-        if mp:
-            vpd = pairwise_mp(interval_inputs, cost)
-        else:
-            vpd = pairwise(interval_inputs, cost)
+            interval_inputs.append(insp[(prv < insp) & (insp <= nxt)])
+        vpd = pairwise_func(interval_inputs, cost)
         vpdists.append(vpd)
     return vpdists
 

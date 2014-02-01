@@ -23,15 +23,15 @@ def interval(inputspikes, outputspikes, b=0.001, duration=None):
     of the *output* spike train. The result is therefore the distance between
     the input spikes that caused each response.
 
-    inputspikes     - A set of spike trains whose pairwise distance will be
+    inputspikes     A set of spike trains whose pairwise distance will be
                     calculated
 
-    outputspikes    - A single spike train to be used to calculate the
+    outputspikes    A single spike train to be used to calculate the
                     intervals
 
-    b               - Bin width
+    b               Bin width
 
-    duration        - Duration of the simulation or spike train
+    duration        Duration of the simulation or spike train
                         (defaults to last input or output spike)
 
     '''
