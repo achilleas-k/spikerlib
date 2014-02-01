@@ -8,4 +8,5 @@ TODO: List functions and classes and finish docstrings.
 import corrcoef
 import kreuz
 import victor_purpura
+import modulus_metric
 
