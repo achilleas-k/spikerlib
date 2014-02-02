@@ -126,24 +126,32 @@ def distance(t1, t2, ti, te, N):
     return t,d
 
 
-def pairwise(spike_trains, ti, te, N):
+def pairwise(spiketrains, ti, te, N):
     """
-    t is an array of spike time arrays
-    ti the initial time of the recordings
-    te the end time of the recordings
-    N the number of samples used to compute the distance
-    spike_trains is a list of arrays of shape (N, T) with N spike trains
-    The multivariate distance is the instantaneous average over all the
-    pairwise distances
+    Parameters
+    ----------
+    spiketrains : is an array of spike time arrays
+
+    ti : the initial time of the recordings
+
+    te : the end time of the recordings
+
+    N : the number of samples used to compute the distance
+
+    spiketrains : is a list of arrays of shape (N, T) with N spike trains
+        The multivariate distance is the instantaneous average over all the
+        pairwise distances
     """
+    # remove empty spike trains
+    spiketrains = [sp for sp in spiketrains if len(sp)]
     d = np.zeros((N,))
-    n_trains = len(spike_trains)
+    n_trains = len(spiketrains)
     t = 0
-    for i, t1 in enumerate(spike_trains[:-1]):
-        for t2 in spike_trains[i+1:]:
+    for i, t1 in enumerate(spiketrains[:-1]):
+        for t2 in spiketrains[i+1:]:
             tij, dij = distance(t1, t2, ti, te, N)
             if(i == 0):
-                t = tij # The times are only dependent on ti, te, and N
+                t = tij  # The times are only dependent on ti, te, and N
             d = d + dij
     d = d / float(n_trains * (n_trains-1) /2)
     return t,d
@@ -158,9 +166,11 @@ def pairwise_mp(spiketrains, ti, te, N):
     Arguments have the same meaning as for `pairwise`.
 
     NB: This function has a slight (on the order 1E-16) deviation from the
-        single-process version of the function ``pairwise()``. The cause of
+        single-process version of the function `pairwise`. The cause of
         the difference has yet to be determined.
     """
+    # remove empty spike trains
+    spiketrains = [sp for sp in spiketrains if len(sp)]
     count = len(spiketrains)
     idx_all = range(count-1)
     pool = multiprocessing.Pool()
@@ -175,7 +185,6 @@ def pairwise_mp(spiketrains, ti, te, N):
     times = distances_nested[0][0]
     for dn in distances_nested:
         distances.extend(dn[1])
-    print(len(distances))
     return times, np.mean(distances)
 
 
@@ -205,15 +214,16 @@ def interval(inputspikes, outputspikes, mp=True):
     *output* spike train. The result is therefore the distance between the
     input spikes that caused each response.
 
-    inputspikes     A set of spike trains whose pairwise distance will be
-                    calculated
+    inputspikes : A set of spike trains whose pairwise distance will be
+        calculated
 
-    outputspikes    A single spike train to be used to calculate the
-                    intervals
+    outputspikes : A single spike train to be used to calculate the
+        intervals
 
-    mp              Set to True to use the multiprocessing implementation
-                    of the pairwise calculation function or False to use the
-                    single process version (default: True)
+    mp : Set to True to use the multiprocessing implementation
+        of the pairwise calculation function or False to use the
+        single process version (default: True)
+
     """
     krdists = []
     pairwise_func = pairwise_mp if mp else pairwise

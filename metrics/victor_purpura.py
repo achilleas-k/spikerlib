@@ -12,9 +12,11 @@ def distance(st_one, st_two, cost):
     Calculates the "spike time" distance (Victor & Purpura, 1996) for a single
     cost.
 
-    tli     - vector of spike times for first spike train
-    tlj     - vector of spike times for second spike train
-    cost    - cost per unit time to move a spike
+    Parameters
+    ----------
+    tli : vector of spike times for first spike train
+    tlj : nvector of spike times for second spike train
+    cost : cost per unit time to move a spike
 
     Translated to Python by Achilleas Koutsou from Matlab code by Daniel Reich.
     """
@@ -45,6 +47,8 @@ def pairwise_mp(spiketrains, cost):
     Uses Python's multiprocessing.Pool() to run each pairwise distance
     calculation in parallel.
     """
+    # remove empty spike trains
+    spiketrains = [sp for sp in spiketrains if len(sp)]
     count = len(spiketrains)
     idx_all = range(count - 1)
     pool = multiprocessing.Pool()
@@ -59,15 +63,17 @@ def pairwise_mp(spiketrains, cost):
     return np.mean(distances)
 
 
-def pairwise(all_spikes, cost):
+def pairwise(spiketrains, cost):
     """
     Calculates the average pairwise distance between a set of spike trains.
     """
-    count = len(all_spikes)
+    # remove empty spike trains
+    spiketrains = [sp for sp in spiketrains if len(sp)]
+    count = len(spiketrains)
     distances = []
     for i in range(count - 1):
         for j in range(i + 1, count):
-            dist = distance(all_spikes[i], all_spikes[j], cost)
+            dist = distance(spiketrains[i], spiketrains[j], cost)
             distances.append(dist)
     return np.mean(distances)
 
@@ -95,17 +101,19 @@ def interval(inputspikes, outputspikes, cost, mp=True):
     *output* spike train. The result is the distance between the input
     spikes that caused each response.
 
-    inputspikes     A set of spike trains whose pairwise distance will be
-                    calculated
+    Parameters
+    ----------
+    inputspikes : A set of spike trains whose pairwise distance will be
+        calculated
 
-    outputspikes    A single spike train to be used to calculate the
-                    intervals
+    outputspikes : A single spike train to be used to calculate the
+        intervals
 
-    cost            The cost of moving a spike
+    cost : The cost of moving a spike
 
-    mp              Set to True to use the multiprocessing implementation
-                    of the pairwise calculation function or False to use the
-                    single process version (default: True)
+    mp : Set to True to use the multiprocessing implementation
+        of the pairwise calculation function or False to use the
+        single process version (default: True)
 
     """
     vpdists = []

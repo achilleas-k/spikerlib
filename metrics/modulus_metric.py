@@ -212,6 +212,8 @@ def pairwise_mp(spiketrains, start, end):
     Uses Python's multiprocessing.Pool() to run each pairwise distance
     calculation in parallel.
     """
+    # remove empty spike trains
+    spiketrains = [sp for sp in spiketrains if len(sp)]
     count = len(spiketrains)
     distances = []
     idx_all = range(count - 1)
@@ -233,6 +235,8 @@ def pairwise(spiketrains, start, end):
     Calculates the average pairwise modulus distance between a set of
     spike trains.
     """
+    # remove empty spike trains
+    spiketrains = [sp for sp in spiketrains if len(sp)]
     count = len(spiketrains)
     distances = []
     for i in range(count - 1):
