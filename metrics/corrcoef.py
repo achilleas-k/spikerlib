@@ -43,7 +43,7 @@ def interval(inputspikes, outputspikes, b=0.001, duration=None):
     '''
     b = float(b)
     if duration is None:
-        duration = max(max(t) for t in inputspikes)
+        duration = max(max(t) for t in inputspikes if len(t))
         duration = max((duration, max(outputspikes)))
     corrs = []
     for prv, nxt in zip(outputspikes[:-1], outputspikes[1:]):
