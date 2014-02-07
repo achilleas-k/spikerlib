@@ -174,18 +174,21 @@ def pairwise_mp(spiketrains, ti, te, N):
     count = len(spiketrains)
     idx_all = range(count-1)
     pool = multiprocessing.Pool()
-    distances_nested = pool.map(_all_dist_to_end,
-                                zip(idx_all, itertools.repeat(spiketrains),
-                                    itertools.repeat(ti),
-                                    itertools.repeat(te),
-                                    itertools.repeat(N)))
-    distances = []
+    pool_results = pool.map(_all_dist_to_end,
+                            zip(idx_all, itertools.repeat(spiketrains),
+                                itertools.repeat(ti),
+                                itertools.repeat(te),
+                                itertools.repeat(N)))
     pool.close()
     pool.join()
-    times = distances_nested[0][0]
-    for dn in distances_nested:
-        distances.extend(dn[1])
-    return times, np.mean(distances)
+    # Each pool calculated a different number of distance pairs
+    # due to the nature of the `_all_dist_to_end` function.
+    # We need to organise them into a proper 2D array.
+    times = pool_results[0][0]
+    distances = []
+    for pr in pool_results:
+        distances.extend(pr[1])
+    return times, np.mean(distances, axis=0)
 
 
 def _all_dist_to_end(args):
