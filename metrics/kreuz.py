@@ -209,7 +209,7 @@ def _all_dist_to_end(args):
     return times, distances
 
 
-def interval(inputspikes, outputspikes, mp=True):
+def interval(inputspikes, outputspikes, samples=1, mp=True):
     """
     Calculates the mean pairwise SPIKE-distance in intervals defined
     by a separate spike train. This function is used to calculate the distance
@@ -217,11 +217,15 @@ def interval(inputspikes, outputspikes, mp=True):
     *output* spike train. The result is therefore the distance between the
     input spikes that caused each response.
 
+    Parameters
+    ==========
     inputspikes : A set of spike trains whose pairwise distance will be
         calculated
 
     outputspikes : A single spike train to be used to calculate the
         intervals
+
+    samples : The number of samples to use to for each interval
 
     mp : Set to True to use the multiprocessing implementation
         of the pairwise calculation function or False to use the
@@ -231,7 +235,7 @@ def interval(inputspikes, outputspikes, mp=True):
     krdists = []
     pairwise_func = pairwise_mp if mp else pairwise
     for prv, nxt in zip(outputspikes[:-1], outputspikes[1:]):
-        krd = pairwise_func(inputspikes, prv, nxt, 1)
+        krd = pairwise_func(inputspikes, prv, nxt, samples)
         krdists.append(krd[1])
     return krdists
 
