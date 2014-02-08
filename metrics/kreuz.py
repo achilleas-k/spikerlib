@@ -129,7 +129,7 @@ def distance(t1, t2, ti, te, N):
 def pairwise(spiketrains, ti, te, N):
     """
     Parameters
-    ----------
+    ==========
     spiketrains : is an array of spike time arrays
 
     ti : the initial time of the recordings
