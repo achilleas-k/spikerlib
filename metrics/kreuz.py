@@ -232,11 +232,13 @@ def interval(inputspikes, outputspikes, samples=1, mp=True):
         single process version (default: True)
 
     """
+    times = []
     krdists = []
     pairwise_func = pairwise_mp if mp else pairwise
     for prv, nxt in zip(outputspikes[:-1], outputspikes[1:]):
         krd = pairwise_func(inputspikes, prv, nxt, samples)
+        times.append(krd[0])
         krdists.append(krd[1])
-    return krdists
+    return times, krdists
 
 
