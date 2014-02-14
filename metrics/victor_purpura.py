@@ -121,6 +121,7 @@ def interval(inputspikes, outputspikes, cost, mp=True):
     for prv, nxt in zip(outputspikes[:-1], outputspikes[1:]):
         interval_inputs = []
         for insp in inputspikes:
+            insp = np.array(insp)
             interval_inputs.append(insp[(prv < insp) & (insp <= nxt)])
         vpd = pairwise_func(interval_inputs, cost)
         vpdists.append(vpd)
