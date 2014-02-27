@@ -273,7 +273,8 @@ def interval(inputspikes, outputspikes, start, end, mp=True):
         interval_inputs = []
         for insp in inputspikes:
             interval_inputs.append(insp[(prv < insp) & (insp <= nxt)])
-        mod = pairwise_func(interval_inputs, start, end)
+        #mod = pairwise_func(interval_inputs, start, end)
+        mod = pairwise_func(interval_inputs, prv, nxt)
         modists.append(mod)
     return modists
 
