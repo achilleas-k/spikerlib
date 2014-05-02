@@ -11,8 +11,9 @@ import sys
 import os
 from pickle import load
 from numpy import (array, diff, floor, zeros, mean, std, shape,
-    random, cumsum, histogram, where, arange, divide, exp,
-    count_nonzero, bitwise_and, append, ones, flatnonzero, ndarray)
+                   random, cumsum, histogram, where, arange, divide, exp,
+                   count_nonzero, bitwise_and, append, ones, flatnonzero,
+                   ndarray)
 import random as rnd
 from warnings import warn
 import gc
@@ -43,7 +44,6 @@ except ImportError:
     msecond = 0.001
     second = 1
     volt = 1
-
 
 
 class SynchronousInputGroup:
@@ -80,8 +80,8 @@ class SynchronousInputGroup:
         self.sync = synchrony
         self.jitter = jitter
         self._dt = dt
-        self._gen = self.configure_generators(self.N, self.rate, self.sync,\
-                self.jitter, self._dt)
+        self._gen = self.configure_generators(self.N, self.rate, self.sync,
+                                              self.jitter, self._dt)
 
     def __call__(self):
         return self._gen
@@ -125,7 +125,7 @@ class SynchronousInputGroup:
         for i in range(n_ident):
             spiketrains.append(st_ident)
 
-        for i in range(n_ident,n):
+        for i in range(n_ident, n):
             spiketrains.append(self.sync_inp_gen(1, rate, 0*second, dt))
 
         return spiketrains
@@ -163,7 +163,7 @@ class SynchronousInputGroup:
         while(True):
             if iter == n:
                 interval = random.exponential(1./rate)*second
-                if interval < dt: # prevents spike stacking
+                if interval < dt:  # prevents spike stacking
                     interval = dt
                 prev_t = t
                 t += interval
@@ -220,7 +220,7 @@ def _run_calib(nrndef, N_in, f_in, w_in, input_configs, active_idx):
     clear(True)
     gc.collect()
     eqs = nrndef['eqs']
-    #V_th = nrndef['V_th']
+    # V_th = nrndef['V_th']
     refr = nrndef['refr']
     reset = nrndef['reset']
     nrngrp = NeuronGroup(len(input_configs), eqs, threshold='V>V_th',
@@ -233,7 +233,8 @@ def _run_calib(nrndef, N_in, f_in, w_in, input_configs, active_idx):
     randConns = []
     active_configs = array(input_configs)[active_idx]
     for idx, (sync, jitter) in zip(active_idx, active_configs):
-        sg, rg = gen_input_groups(N_in, f_in[idx], sync, jitter, calib_duration)
+        sg, rg = gen_input_groups(N_in, f_in[idx], sync, jitter,
+                                  calib_duration)
         if len(sg):
             sConn = Connection(sg, nrngrp[idx], state='V', weight=w_in)
             syncConns.append(sConn)
@@ -246,7 +247,7 @@ def _run_calib(nrndef, N_in, f_in, w_in, input_configs, active_idx):
     calib_network.add(st_mon)
     print(">")
     calib_network.run(calib_duration)
-    actual_f_out = array([1.0*len(spikes)/calib_duration\
+    actual_f_out = array([1.0*len(spikes)/calib_duration
                           for spikes in st_mon.spiketimes.itervalues()])
     # del probably unnecessary
     # del(calib_network, syncConns, randConns, st_mon)
@@ -256,7 +257,7 @@ def _run_calib(nrndef, N_in, f_in, w_in, input_configs, active_idx):
 def _calc_rate_of_change(X, Y):
     if all(Y > 0):
         return X/Y
-    gtz = Y>0
+    gtz = Y > 0
     ret = zeros(len(X))
     ret[gtz] = X[gtz]/Y[gtz]
     ret[~gtz] = X[~gtz]
@@ -279,7 +280,7 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
     print("Testing inputs:")
     print(f_in)
     actual_out = _run_calib(nrndef, N_in, f_in, w_in, input_configs,
-                                                    arange(len(nrndef)))
+                            arange(len(nrndef)))
     # found = abs(desired_out-actual_out) < 2  # 2 Hz margin
     found = desired_out < actual_out
     print("Actual out:")
@@ -295,7 +296,7 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
         print("Testing inputs:")
         print(f_in)
         actual_out = _run_calib(nrndef, N_in, f_in, w_in, input_configs,
-                                    flatnonzero(~found))
+                                flatnonzero(~found))
         # found = found | (abs(desired_out-actual_out) < 2)
         found = found | (desired_out < actual_out)
         print("Actual out:")
@@ -303,7 +304,7 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
         print("Found: %i/%i" % (sum(found), len(found)))
         print(found)
         found = found | (f_in > 500)
-        f_in[f_in>800] = 0
+        f_in[f_in > 800] = 0
     return f_in
 
 
@@ -318,7 +319,7 @@ def loadsim(simname):
     If any of the above is not found, the function returns an empty list
     for the respective variable.
 
-    NOTE: Best to use brian.tools.datamanager.DataManager object where possible.
+    NOTE: Best to use brian.tools.datamanager.DataManager object where possible
 
     Parameters
     ----------
@@ -335,19 +336,19 @@ def loadsim(simname):
 
     memname = simname+".mem"
     if (os.path.exists(memname)):
-        mem = load(open(memname,"rb"))
+        mem = load(open(memname, "rb"))
     else:
         mem = array([])
 
     outname = simname+".out"
     if (os.path.exists(outname)):
-        spiketrain = load(open(outname,"rb"))
+        spiketrain = load(open(outname, "rb"))
     else:
         spiketrain = array([])
 
     stmname = simname+".stm"
     if (os.path.exists(stmname)):
-        stm = load(open(stmname,"rb"))
+        stm = load(open(stmname, "rb"))
     else:
         stm = array([])
 
@@ -389,7 +390,7 @@ def slope_distribution(v, w, rem_zero=True):
 
     nbins = (max(dv)-min(dv))/w
     nbins = int(nbins)
-    dist = histogram(dv,nbins)
+    dist = histogram(dv, nbins)
     return dist
 
 
@@ -420,7 +421,7 @@ def positive_slope_distribution(v, w):
     dv = dv[dv > 0]
     nbins = (max(dv)-min(dv))/w
     nbins = int(nbins)
-    dist = histogram(dv,nbins)
+    dist = histogram(dv, nbins)
     return dist
 
 
@@ -434,7 +435,8 @@ def plot_slope_bounds(spiketrain, v0, vr, vth, tau, dt):
         nxt_dt = int(nxt/dt)
         isi_dt = nxt_dt-prv_dt
         time_since_spike[prv_dt:nxt_dt] = arange(isi_dt)*dt
-        low_input[prv_dt:nxt_dt] = ones(isi_dt)*(vth-vr)/(1-exp(-(nxt-prv)/tau))
+        low_input[prv_dt:nxt_dt] = ones(isi_dt)*(vth-vr) /\
+            (1-exp(-(nxt-prv)/tau))
     times = arange(0, duration, float(dt))
     high_bound = v0+(vr-v0)*exp(-time_since_spike/tau)
     low_bound = vr+low_input*(1-exp(-time_since_spike/tau))
@@ -442,8 +444,8 @@ def plot_slope_bounds(spiketrain, v0, vr, vth, tau, dt):
 
 
 def pre_spike_slopes(mem, spiketrain, vth, w, dt=0.1*msecond):
-    #duration = spiketrain[-1]
-    #duration_dt = int(duration/dt)
+    # duration = spiketrain[-1]
+    # duration_dt = int(duration/dt)
     spiketrain_dt = (spiketrain/dt).astype(int)
     w_dt = int(w/dt)
     pre_spike_mem = mem[spiketrain_dt-w_dt]
@@ -451,20 +453,24 @@ def pre_spike_slopes(mem, spiketrain, vth, w, dt=0.1*msecond):
     return pre_spike_slopes
 
 
-def normalised_pre_spike_slopes(mem, spiketrain, v0, vth, tau, w, dt=0.1*msecond):
+def normalised_pre_spike_slopes(mem, spiketrain, v0, vth, tau, w,
+                                dt=0.1*msecond):
     first_spike = spiketrain[0]
     first_spike_dt = int(first_spike/dt)
-    vr = mem[first_spike_dt+1]*volt  # reset potential
+    # TODO: Check if *volt is required here - it breaks when no units are
+    # supplied for any of the arguments
+    vr = mem[first_spike_dt+1]  # *volt  # reset potential
     duration = spiketrain[-1]
     duration_dt = int(duration/dt)
-    time_since_spike = ones(duration_dt)*10000
+    time_since_spike = ones(duration_dt)*10000  # arbitrary large number
     low_input = zeros(duration_dt)-vr
     for prv, nxt in zip(spiketrain[:-1], spiketrain[1:]):
         prv_dt = int(prv/dt)
         nxt_dt = int(nxt/dt)
         isi_dt = nxt_dt-prv_dt
         time_since_spike[prv_dt:nxt_dt] = arange(isi_dt)*dt
-        low_input[prv_dt:nxt_dt] = ones(isi_dt)*(vth-vr)/(1-exp(-(nxt-prv)/tau))
+        low_input[prv_dt:nxt_dt] = ones(isi_dt)*(vth-vr) /\
+            (1-exp(-(nxt-prv)/tau))
     high_bound = v0+(vr-v0)*exp(-time_since_spike/tau)
     low_bound = vr+low_input*(1-exp(-time_since_spike/tau))
     window_starts = spiketrain-w
@@ -484,7 +490,7 @@ def normalised_pre_spike_slopes(mem, spiketrain, v0, vth, tau, w, dt=0.1*msecond
     dbz_idx = high_slopes == low_slopes
     high_slopes[dbz_idx] += 1e-10
     norm_slopes = (mem_slopes-low_slopes)/(high_slopes-low_slopes)
-    norm_slopes[norm_slopes<0] = 0  # this should be fixed
+    norm_slopes[norm_slopes < 0] = 0  # this should be fixed
     return norm_slopes
 
 
@@ -527,14 +533,14 @@ def sta(v, spiketrain, w, dt=0.0001*second):
         sta_wins = array([])
         return sta_avg, sta_std, sta_wins
 
-    w_d = int(w/dt) # window length in dt
-    sta_wins = zeros((len(spiketrain),w_d))
+    w_d = int(w/dt)  # window length in dt
+    sta_wins = zeros((len(spiketrain), w_d))
     for i, st in enumerate(spiketrain):
         t_d = int(st/dt)
         if (w_d < t_d):
-            w_start = t_d-w_d # window start position index
-            w_end = t_d # window end index
-            sta_wins[i,:] = v[w_start:w_end]
+            w_start = t_d-w_d  # window start position index
+            w_end = t_d  # window end index
+            sta_wins[i, :] = v[w_start:w_end]
         else:
             '''
             We have two options here:
@@ -552,9 +558,9 @@ def sta(v, spiketrain, w, dt=0.0001*second):
             w_start = 0
             w_end = t_d
             curwin = append(zeros(w_d-t_d), v[:t_d])
-            sta_wins[i,:] = curwin
-    sta_avg = mean(sta_wins,0)
-    sta_std = std(sta_wins,0)
+            sta_wins[i, :] = curwin
+    sta_avg = mean(sta_wins, 0)
+    sta_std = std(sta_wins, 0)
 
     return sta_avg, sta_std, sta_wins
 
@@ -601,12 +607,12 @@ def sync_inp(n, rate, s, sigma, dura, dt=0.0001*second):
 
     n_ident = int(floor(n*s))   # number of identical spike trains
     spiketrains = []
-    st_ident = poisson_spikes(dura,rate,dt)
+    st_ident = poisson_spikes(dura, rate, dt)
     for i in range(n_ident):
-        spiketrains.append(add_gauss_jitter(st_ident,sigma,dt))
+        spiketrains.append(add_gauss_jitter(st_ident, sigma, dt))
 
-    for i in range(n_ident,n):
-        spiketrains.append(poisson_spikes(dura,rate,dt))
+    for i in range(n_ident, n):
+        spiketrains.append(poisson_spikes(dura, rate, dt))
 
     return spiketrains
 
@@ -653,7 +659,7 @@ def poisson_spikes(dura, rate, dt=0.0001*second):
     return spiketrain
 
 
-def add_gauss_jitter(spiketrain,jitter,dt=0.0001*second):
+def add_gauss_jitter(spiketrain, jitter, dt=0.0001*second):
     '''
     Adds jitter to each spike in the supplied spike train and returns the
     resulting spike train.
@@ -689,7 +695,7 @@ def add_gauss_jitter(spiketrain,jitter,dt=0.0001*second):
     intervals = diff(jspiketrain)
     while min(intervals) < dt/second:
         index = where(intervals == min(intervals))[0][0]
-        intervals[index]+=dt/second
+        intervals[index] += dt/second
     jspiketrain = cumsum(intervals)
     jspiketrain = [st*second for st in jspiketrain]
     return jspiketrain
@@ -786,7 +792,7 @@ def PSTH(spikes, bin=0.001*second, dt=0.001*second, duration=None):
     psth = zeros(nbins)
     for b in arange(0, nbins, 1):
         binspikes = bitwise_and(flatspikes >= b*bin,
-                flatspikes < (b+1)*bin)
+                                flatspikes < (b+1)*bin)
         psth[b] = count_nonzero(binspikes)
     return arange(0*second, duration*second, bin), psth
 
@@ -799,10 +805,10 @@ def unitrange(start, stop, step):
     '''
     if not isinstance(start, units.Quantity):
         raise TypeError("unitrange: `start` argument is not a brian unit."
-            "Use Python build-in range() or numpy.arange()")
+                        "Use Python build-in range() or numpy.arange()")
     if not isinstance(stop, units.Quantity):
         raise TypeError("unitrange: `stop` argument is not a brian unit."
-            "Use Python build-in range() or numpy.arange()")
+                        "Use Python build-in range() or numpy.arange()")
     if not isinstance(step, units.Quantity):
         raise TypeError("unitrange: `step` argument is not a brian unit."
                         "Use Python build-in range() or numpy.arange()")
@@ -831,7 +837,7 @@ def spike_period_hist(spiketimes, freq, duration, nbins=10, dt=0.0001*second):
         for p in range(nper):
             perstart = p*period
             inbin = st_a[(st_a >= perstart+i*binwidth) &
-                    (st_a < perstart+(i+1)*binwidth-1)]
+                         (st_a < perstart+(i+1)*binwidth-1)]
             bins[i] += len(inbin)
     left = arange(0, 1, 1./nbins)
     return left, bins
@@ -849,5 +855,3 @@ def recursiveflat(ndobject):
         return ndobject
     else:
         return recursiveflat([item for row in ndobject for item in row])
-
-
