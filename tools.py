@@ -455,8 +455,7 @@ def pre_spike_slopes(mem, spiketrain, vth, w, dt=0.1*msecond):
     return pre_spike_slopes
 
 
-def normalised_pre_spike_slopes(mem, spiketrain, v0, vth, tau, w,
-                                dt=0.1*msecond):
+def npss(mem, spiketrain, v0, vth, tau, w, dt=0.1*msecond):
     """
     Calculate the normalised pre-spike slopes for the given data.
 
