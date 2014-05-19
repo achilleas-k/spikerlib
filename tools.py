@@ -10,10 +10,12 @@ from __future__ import print_function
 import sys
 import os
 from pickle import load
+import collections
 from numpy import (array, diff, floor, zeros, mean, std, shape,
                    random, cumsum, histogram, where, arange, divide, exp,
                    count_nonzero, bitwise_and, append, ones, flatnonzero,
-                   ndarray)
+                   ndarray, convolve, linspace)
+from matplotlib.mlab import normpdf
 import random as rnd
 from warnings import warn
 import gc
@@ -855,3 +857,43 @@ def recursiveflat(ndobject):
         return ndobject
     else:
         return recursiveflat([item for row in ndobject for item in row])
+
+
+def spikeconvolve(spikes, sigma, dt=0.0001*second):
+    """
+    Given a SpikeMonitor, convolves the binned spike trains (binned at `dt`)
+    with a Gaussian kernel of width `sigma`.  Instead of a SpikeMonitor
+    object, the spike trains can also be provided as a list (or iterable) of
+    arrays.  The limits and precision of the array for the convolution kernel
+    is determined by the width `sigma` provided for the convolution.
+
+    Parameters
+    ----------
+    spikes : brian.monitor.SpikeMonitor or any iterable of arrays containing
+             spike times
+    sigma : width of Gaussian convolution kernel
+    dt : bin width for spike binning (default: 0.1 ms)
+
+    Returns
+    -------
+    Two 1D arrays: the time of the start of each bin and the convolved spike
+    train, such that plot(t, convspikes) displays the result of the convolution
+    with proper horizontal axis scaling.
+    """
+    dt = float(dt)
+    sigma = float(sigma)
+    if isinstance(spikes, SpikeMonitor):
+        allspikes = array([sp for train in spikes.spiketimes.itervalues()
+                           for sp in train])
+    elif isinstance(spikes, collections.Iterable):
+        allspikes = array([sp for train in spikes for sp in train])
+    binnedspikes = zeros(int(max(allspikes)/dt)+1)
+    for spike in allspikes:
+        bin_idx = int(spike/dt)
+        binnedspikes[bin_idx]+=1
+    x = linspace(-4*sigma, 4*sigma, 100)
+    convkernel = normpdf(x, 0, sigma)
+    convspikes = convolve(binnedspikes, convkernel, mode="same")
+    t = arange(0, max(allspikes)+dt, dt)
+    return t, convspikes
+
