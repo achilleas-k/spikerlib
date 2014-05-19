@@ -474,11 +474,15 @@ def npss(mem, spiketrain, v0, vth, tau, w, dt=0.1*msecond):
     List of values that represent the normalised pre-spike slope for each of
     the output spikes (except the first spike)
     """
+    # Cast everything to float to avoid dimension errors
+    v0 = float(v0)
+    vth = float(vth)
+    tau = float(tau)
+    w = float(w)
+    dt = float(dt)
     first_spike = spiketrain[0]
     first_spike_dt = int(first_spike/dt)
-    # TODO: Check if *volt is required here - it breaks when no units are
-    # supplied for any of the arguments
-    vr = mem[first_spike_dt+1]  # *volt  # reset potential
+    vr = mem[first_spike_dt+1]  # reset potential
     duration = spiketrain[-1]
     duration_dt = int(duration/dt)
     time_since_spike = ones(duration_dt)*10000  # arbitrary large number
