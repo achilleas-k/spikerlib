@@ -457,6 +457,24 @@ def pre_spike_slopes(mem, spiketrain, vth, w, dt=0.1*msecond):
 
 def normalised_pre_spike_slopes(mem, spiketrain, v0, vth, tau, w,
                                 dt=0.1*msecond):
+    """
+    Calculate the normalised pre-spike slopes for the given data.
+
+    Arguments
+    ---------
+    mem : membrane potential trace
+    spiketrain : the spike train produced by the supplied membrane potential
+    v0 : resting potential of the neuron
+    vth : firing threshold
+    tau : membrane leak time constant
+    w : coincidence window
+    dt : simulation time step (default: 0.1 ms)
+
+    Returns
+    -------
+    List of values that represent the normalised pre-spike slope for each of
+    the output spikes (except the first spike)
+    """
     first_spike = spiketrain[0]
     first_spike_dt = int(first_spike/dt)
     # TODO: Check if *volt is required here - it breaks when no units are
