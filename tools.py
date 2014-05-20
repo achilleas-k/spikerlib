@@ -488,6 +488,7 @@ def npss(mem, spiketrain, v0, vth, tau, w, dt=0.1*msecond):
     time_since_spike = ones(duration_dt)*10000  # arbitrary large number
     low_input = zeros(duration_dt)-vr
     for prv, nxt in zip(spiketrain[:-1], spiketrain[1:]):
+        # can probably vectorise or parallelise this bit
         prv_dt = int(prv/dt)
         nxt_dt = int(nxt/dt)
         isi_dt = nxt_dt-prv_dt
@@ -915,6 +916,6 @@ def spikeconvolve(spikes, sigma, dt=0.0001*second):
     x = linspace(-4*sigma, 4*sigma, 100)
     convkernel = normpdf(x, 0, sigma)
     convspikes = convolve(binnedspikes, convkernel, mode="same")
-    t = arange(0, max(allspikes)+dt, dt)
+    t = arange(0, len(convspikes), 1)*dt
     return t, convspikes
 
