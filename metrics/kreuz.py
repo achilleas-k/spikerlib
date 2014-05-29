@@ -219,8 +219,8 @@ def interval(inputspikes, outputspikes, samples=1, mp=True):
 
     Parameters
     ==========
-    inputspikes : A set of spike trains whose pairwise distance will be
-        calculated
+    inputspikes : A list or array of spike trains whose pairwise distance will
+        be calculated
 
     outputspikes : A single spike train to be used to calculate the
         intervals
