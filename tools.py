@@ -592,7 +592,7 @@ def sta(v, spiketrain, w, dt=0.0001*second):
 def sync_inp(n, rate, s, sigma, dura, dt=0.0001*second):
     '''
     Generates synchronous spike trains and returns spiketimes compatible
-    with Brian's MultipleSpikeGeneratorGroup function.
+    with Brian's SpikeGeneratorGroup function.
     In other words, the array returned by this module should be passed as the
     argument to the MulitpleSpikeGeneratorGroup in order to define it as an
     input group.
