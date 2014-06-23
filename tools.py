@@ -511,6 +511,7 @@ def npss(mem, spiketrain, v0, vth, tau, w, dt=0.1*msecond):
     tau = float(tau)
     w = float(w)
     dt = float(dt)
+    w_dt = int(w/dt)
     first_spike = spiketrain[0]
     first_spike_dt = int(first_spike/dt)
     vr = mem[first_spike_dt+1]  # reset potential
@@ -528,8 +529,8 @@ def npss(mem, spiketrain, v0, vth, tau, w, dt=0.1*msecond):
             (1-exp(-(nxt-prv)/tau))
     high_bound = v0+(vr-v0)*exp(-time_since_spike/tau)
     low_bound = vr+low_input*(1-exp(-time_since_spike/tau))
-    window_starts = spiketrain-w
-    window_starts_dt = (window_starts[1:]/dt).astype(int)
+    spiketrain_dt = (spiketrain/dt).astype(int)
+    window_starts_dt = spiketrain_dt-w_dt
     # there's some redundant processing here for clarity
     # all values, mem, low and high bound at (t_i-w) are converted to slopes by
     # calculating (vth-x)/w, which means we could just avoid it and the
