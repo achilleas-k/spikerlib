@@ -221,10 +221,27 @@ def poisson_times(f_in, duration):
         spiketime += rnd.expovariate(f_in)
     return array(poisstrain)
 
-def fast_synchronous_input_gen(N_in, f_in, S_in, sigma, duration):
+def fast_synchronous_input_gen(N_in, f_in, S_in, sigma, duration, shuffle=False):
     """
+    Generate combination of synchronous and random spike trains.
+
     Generate an input group which contains `N_in*S_in` synchronous spike trains,
     with jitter `sigma`, and `1-N_in*S_in` independent (Poisson) spike trains.
+    Setting `shuffle=True` will shuffle the order of the spike trains so that
+    the synchronous spike trains don't appear in order in spike rasters.
+
+    Parameters
+    ----------
+    N_in : Total number of spike trains
+    f_in : Average spike frequency of each spike train
+    S_in : Proportion of synchronous spike trains [0-1]
+    sigma : Temporal jitter applied to synchronous spike trains
+    duration : Duration of the generated spike trains
+    shuffle : Shuffle order in which the spike trains appear (default False)
+
+    Returns
+    -------
+    SpikeGeneratorGroup (brian object)
     """
     if nobrian:
         print("Error: fast_synchronous_input_gen requires Brian",
@@ -245,6 +262,8 @@ def fast_synchronous_input_gen(N_in, f_in, S_in, sigma, duration):
     # convert to [(i, t) ...] format for SpikeGeneratorGroup
     # also filter negative spike times
     spiketuples = []
+    if shuffle:
+        random.shuffle(spikearray)
     for idx, spiketimes in enumerate(spikearray):
         spiketuples.extend([(idx, st) for st in spiketimes if st > 0])
     return SpikeGeneratorGroup(N=N_in, spiketimes=spiketuples)
