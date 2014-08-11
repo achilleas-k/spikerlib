@@ -1,5 +1,5 @@
 """
-Modifications made by Achilleas Koutsou. List follows:
+Modifications made by Achilleas Koutsou:
 
 - Original function renamed to `distance` to comply with the other modules
 in spikerlib.
