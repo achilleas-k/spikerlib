@@ -18,7 +18,7 @@ def distance(st_one, st_two, cost):
     tlj : nvector of spike times for second spike train
     cost : cost per unit time to move a spike
 
-    Translated to Python by Achilleas Koutsou from Matlab code by Daniel Reich.
+    Ported to Python by Achilleas Koutsou from Matlab code by Daniel Reich.
     """
     len_one = len(st_one)
     len_two = len(st_two)
