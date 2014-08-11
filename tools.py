@@ -907,7 +907,7 @@ def recursiveflat(ndobject):
     """
     if not len(ndobject):
         return ndobject
-    elif shape(ndobject[0]) == ():
+    elif shape(ndobject[0]) == ():  # TODO: Probably not completely correct
         return ndobject
     else:
         return recursiveflat([item for row in ndobject for item in row])
