@@ -559,8 +559,8 @@ def npss(mem, spiketrain, v0, vth, tau, w, dt=0.1*msecond):
     mem_slopes = (vth-mem[window_starts_dt])/w
 
     # Let's avoid div by zero by adding a tiny value to high_slopes where
-    # necessary. Not the most correct solution, but wont affect results OTOH,
-    # we can just drop them, but that might cause issues with spike counts vs
+    # necessary. Not the most correct solution, but wont affect results. OTOH,
+    # we can just drop them, but that would cause issues with spike counts vs
     # slope counts
     dbz_idx = high_slopes == low_slopes
     high_slopes[dbz_idx] += 1e-10
