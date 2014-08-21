@@ -54,11 +54,16 @@ def _find_corner_spikes(t, train, ibegin, ti, te):
 
 
 def distance(t1, t2, ti, te, N):
-    """Computes the bivariate SPIKE distance of Kreuz et al. (2012)
-       t1 and t2 are 1D arrays with the spiking times of two neurones
-       It returns the array of the values of the distance
-       between time ti and te with N samples.
-       The arrays t1, t2 and values ti, te are unit less """
+    """
+
+    Computes the bivariate SPIKE distance of Kreuz et al. (2012) t1 and t2 are
+    1D arrays with the spiking times of two neurones It returns the array of
+    the values of the distance between time ti and te with N samples.  The
+    arrays t1, t2 and values ti, te are unit less
+
+    TODO: Meaningful variable names
+
+    """
     t = np.linspace(ti+(te-ti)/N, te, N)
     d = np.zeros(t.shape)
 
