@@ -242,6 +242,11 @@ def fast_synchronous_input_gen(N_in, f_in, S_in, sigma, duration, shuffle=False)
     Returns
     -------
     SpikeGeneratorGroup (brian object)
+
+    TODO:
+        - This could become a SpikeGeneratorGroup derived class constructor
+        - Rename function: Remove 'fast' from the name, since it's the default
+        now.
     """
     if nobrian:
         print("Error: fast_synchronous_input_gen requires Brian",
