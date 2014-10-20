@@ -482,7 +482,7 @@ def positive_slope_distribution(v, w):
     return dist
 
 
-def plot_slope_bounds(spiketrain, v0, vr, vth, tau, dt):
+def get_slope_bounds(spiketrain, v0, vr, vth, tau, dt):
     duration = spiketrain[-1]
     duration_dt = int(duration/dt)
     time_since_spike = ones(duration_dt)*10000
@@ -494,10 +494,9 @@ def plot_slope_bounds(spiketrain, v0, vr, vth, tau, dt):
         time_since_spike[prv_dt:nxt_dt] = arange(isi_dt)*dt
         low_input[prv_dt:nxt_dt] = ones(isi_dt)*(vth-vr) /\
             (1-exp(-(nxt-prv)/tau))
-    times = arange(0, duration, float(dt))
     high_bound = v0+(vr-v0)*exp(-time_since_spike/tau)
     low_bound = vr+low_input*(1-exp(-time_since_spike/tau))
-    plot(times, high_bound, times, low_bound)
+    return high_bound, low_bound
 
 
 def pre_spike_slopes(mem, spiketrain, vth, w, dt=0.1*msecond):
