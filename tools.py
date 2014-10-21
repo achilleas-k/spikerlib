@@ -32,6 +32,7 @@ try:
     msecond = brian.msecond
     volt = brian.volt
     second = brian.second
+    hertz = brian.hertz
     PoissonGroup = brian.PoissonGroup
     NeuronGroup = brian.NeuronGroup
     Network = brian.Network
@@ -39,6 +40,7 @@ try:
     PulsePacket = brian.PulsePacket
     SpikeGeneratorGroup = brian.SpikeGeneratorGroup
     SpikeMonitor = brian.SpikeMonitor
+    StateMonitor = brian.StateMonitor
     plot = brian.plot
     clear = brian.clear
 except ImportError:
@@ -273,41 +275,49 @@ def fast_synchronous_input_gen(N_in, f_in, S_in, sigma, duration, shuffle=False)
         spiketuples.extend([(idx, st) for st in spiketimes if st > 0])
     return SpikeGeneratorGroup(N=N_in, spiketimes=spiketuples)
 
-def _run_calib(nrndef, N_in, f_in, w_in, input_configs, active_idx):
+def _run_calib(nrndef, N_in, f_in, w_in, input_configs, active_idx=None):
+    if active_idx is None:
+        active_idx = arange(len(input_configs))
     clear(True)
     gc.collect()
-    eqs = nrndef['eqs']
+    brian.defaultclock.reinit()
+    #eqs = nrndef['eqs']
     # V_th = nrndef['V_th']
-    refr = nrndef['refr']
-    reset = nrndef['reset']
-    nrngrp = NeuronGroup(len(input_configs), eqs, threshold='V>V_th',
-                         refractory=refr,
-                         reset='V=reset')
-    calib_duration = 50*msecond
-    nrngrp.V = reset  # assumes V state variable - TODO: guess alternatives
+    #refr = nrndef['refr']
+    #reset = nrndef['reset']
+    nrngrp = NeuronGroup(N=len(input_configs), **nrndef)
+    calib_duration = 500*msecond
     calib_network = Network(nrngrp)
-    syncConns = []
-    randConns = []
+    #syncConns = []
+    #randConns = []
+    inp_conns = []
     active_configs = array(input_configs)[active_idx]
     for idx, (sync, jitter) in zip(active_idx, active_configs):
-        sg, rg = gen_input_groups(N_in, f_in[idx], sync, jitter,
-                                  calib_duration)
-        if len(sg):
-            sConn = Connection(sg, nrngrp[idx], state='V', weight=w_in)
-            syncConns.append(sConn)
-            calib_network.add(sg, sConn)
-        if len(rg):
-            rConn = Connection(rg, nrngrp[idx], state='V', weight=w_in)
-            randConns.append(rConn)
-            calib_network.add(rg, rConn)
+        #sg, rg = gen_input_groups(N_in, f_in[idx]*hertz, sync, jitter,
+        #                          calib_duration)
+        #if len(sg):
+        #    sConn = Connection(sg, nrngrp[idx], state='V', weight=w_in)
+        #    syncConns.append(sConn)
+        #    calib_network.add(sg, sConn)
+        #if len(rg):
+        #    rConn = Connection(rg, nrngrp[idx], state='V', weight=w_in)
+        #    randConns.append(rConn)
+        #    calib_network.add(rg, rConn)
+        inp_grp = fast_synchronous_input_gen(N_in, f_in[idx]*hertz, sync,
+                                             jitter, calib_duration)
+        inp_conn = Connection(inp_grp, nrngrp[idx], state='V', weight=w_in)
+        inp_conns.append(inp_conn)
+        calib_network.add(inp_grp, inp_conn)
     st_mon = SpikeMonitor(nrngrp)
-    calib_network.add(st_mon)
+    v_mon = StateMonitor(nrngrp, 'V', record=True)
+    calib_network.add(st_mon, v_mon)
     print(">")
     calib_network.run(calib_duration)
     actual_f_out = array([1.0*len(spikes)/calib_duration
                           for spikes in st_mon.spiketimes.itervalues()])
     # del probably unnecessary
     # del(calib_network, syncConns, randConns, st_mon)
+    del(calib_network)
     return actual_f_out
 
 
@@ -328,6 +338,19 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
     the input frequency on a short simulation.
 
     Requires Brian.
+
+    Parameters
+    ----------
+    nrndef          : passed directly to NeuronGroup as a dictionary
+    N_in            : number of inputs
+    w_in            : input weight
+    input_configs   : list of tuples (sync, jitter)
+    f_out           : desired output frequency
+
+    Returns
+    -------
+    f_in            : array of input frequencies of the same length
+                    as input_configs
     '''
     if nobrian:
         print("Error: calibrate_frequencies requires Brian", file=sys.stderr)
@@ -336,8 +359,7 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
     f_in = ones(len(input_configs))*10
     print("Testing inputs:")
     print(f_in)
-    actual_out = _run_calib(nrndef, N_in, f_in, w_in, input_configs,
-                            arange(len(nrndef)))
+    actual_out = _run_calib(nrndef, N_in, f_in, w_in, input_configs)
     # found = abs(desired_out-actual_out) < 2  # 2 Hz margin
     found = desired_out < actual_out
     print("Actual out:")
@@ -347,7 +369,7 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
     print("Calibrating ...")
     df_in = zeros(len(input_configs))+10
     while not all(found):
-        print("-")
+        print(">>>>>>")
         df_in[found] = 0
         f_in += df_in
         print("Testing inputs:")
