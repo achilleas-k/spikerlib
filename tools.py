@@ -330,7 +330,7 @@ def _calc_rate_of_change(X, Y):
     return ret
 
 
-def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
+def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out, maxtries=-1):
     '''
     Calculates the input frequency required to produce the desired output rate
     by assuming a linear relationship and iteratively updating and retesting
@@ -364,7 +364,9 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
     print("%i/%i ..." % (sum(found), Nsims), end="")
     sys.stdout.flush()
     df_in = zeros(Nsims)+10
-    while not all(found):
+    ntry = 0
+    while not all(found) and (ntry != maxtries):
+        ntry += 1
         df_in[found] = 0
         f_in += df_in
         actual_out = _run_calib(nrndef, N_in, f_in, w_in, input_configs,
