@@ -311,7 +311,6 @@ def _run_calib(nrndef, N_in, f_in, w_in, input_configs, active_idx=None):
     st_mon = SpikeMonitor(nrngrp)
     v_mon = StateMonitor(nrngrp, 'V', record=True)
     calib_network.add(st_mon, v_mon)
-    print(">")
     calib_network.run(calib_duration)
     actual_f_out = array([1.0*len(spikes)/calib_duration
                           for spikes in st_mon.spiketimes.itervalues()])
@@ -356,34 +355,27 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
         print("Error: calibrate_frequencies requires Brian", file=sys.stderr)
         return -1
     desired_out = f_out
-    f_in = ones(len(input_configs))*10
-    print("Testing inputs:")
-    print(f_in)
+    Nsims = len(input_configs)
+    f_in = ones(Nsims)*10
     actual_out = _run_calib(nrndef, N_in, f_in, w_in, input_configs)
     # found = abs(desired_out-actual_out) < 2  # 2 Hz margin
     found = desired_out < actual_out
-    print("Actual out:")
-    print(actual_out)
-    print("Found: %i/%i" % (sum(found), len(found)))
-    print(found)
-    print("Calibrating ...")
-    df_in = zeros(len(input_configs))+10
+    print("Calibrating %i simulations ..." % Nsims)
+    print("%i/%i ..." % (sum(found), Nsims), end="")
+    sys.stdout.flush()
+    df_in = zeros(Nsims)+10
     while not all(found):
-        print(">>>>>>")
         df_in[found] = 0
         f_in += df_in
-        print("Testing inputs:")
-        print(f_in)
         actual_out = _run_calib(nrndef, N_in, f_in, w_in, input_configs,
                                 flatnonzero(~found))
         # found = found | (abs(desired_out-actual_out) < 2)
         found = found | (desired_out < actual_out)
-        print("Actual out:")
-        print(actual_out)
-        print("Found: %i/%i" % (sum(found), len(found)))
-        print(found)
+        print("\r%i/%i ..." % (sum(found), Nsims), end="")
+        sys.stdout.flush()
         found = found | (f_in > 500)
         f_in[f_in > 800] = 0
+    print("\rDone!")
     return f_in
 
 
