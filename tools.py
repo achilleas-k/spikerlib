@@ -375,7 +375,7 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out):
         sys.stdout.flush()
         found = found | (f_in > 500)
         f_in[f_in > 800] = 0
-    print("\rDone!")
+    print("\nDone!")
     return f_in
 
 
