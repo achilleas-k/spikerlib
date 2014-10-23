@@ -330,7 +330,8 @@ def _calc_rate_of_change(X, Y):
     return ret
 
 
-def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out, maxtries=-1):
+def calibrate_frequencies(nrndef, N_in, w_in, synchrony_conf, f_out,
+                          maxtries=-1):
     '''
     Calculates the input frequency required to produce the desired output rate
     by assuming a linear relationship and iteratively updating and retesting
@@ -343,7 +344,7 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out, maxtries=-1)
     nrndef          : passed directly to NeuronGroup as a dictionary
     N_in            : number of inputs
     w_in            : input weight
-    input_configs   : list of tuples (sync, jitter)
+    synchrony_conf  : list of tuples (sync, jitter)
     f_out           : desired output frequency
 
     Returns
@@ -355,9 +356,9 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out, maxtries=-1)
         print("Error: calibrate_frequencies requires Brian", file=sys.stderr)
         return -1
     desired_out = f_out
-    Nsims = len(input_configs)
+    Nsims = len(synchrony_conf)
     f_in = ones(Nsims)*10
-    actual_out = _run_calib(nrndef, N_in, f_in, w_in, input_configs)
+    actual_out = _run_calib(nrndef, N_in, f_in, w_in, synchrony_conf)
     # found = abs(desired_out-actual_out) < 2  # 2 Hz margin
     found = desired_out < actual_out
     print("Calibrating %i simulations ..." % Nsims)
@@ -369,7 +370,7 @@ def calibrate_frequencies(nrndef, N_in, w_in, input_configs, f_out, maxtries=-1)
         ntry += 1
         df_in[found] = 0
         f_in += df_in
-        actual_out = _run_calib(nrndef, N_in, f_in, w_in, input_configs,
+        actual_out = _run_calib(nrndef, N_in, f_in, w_in, synchrony_conf,
                                 flatnonzero(~found))
         # found = found | (abs(desired_out-actual_out) < 2)
         found = found | (desired_out < actual_out)
