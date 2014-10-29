@@ -799,7 +799,7 @@ def add_gauss_jitter(spiketrain, jitter, dt=0.0001*second):
 
 def times_to_bin(spikes, dt=0.001*second, duration=None):
     '''
-    Converts a spike train into a binary strings. Each bit is a bin of
+    Converts a spike train into a binary string. Each bit is a bin of
     fixed width (dt).
     This function is useful for aligning a binary representation of a spike
     train to recordings of the respective membrane potential and for processing
@@ -890,7 +890,7 @@ def PSTH(spikes, bin=0.001*second, dt=0.001*second, duration=None):
         binspikes = bitwise_and(flatspikes >= b*bin,
                                 flatspikes < (b+1)*bin)
         psth[b] = count_nonzero(binspikes)
-    return arange(0*second, duration*second, bin), psth
+    return psth
 
 
 def unitrange(start, stop, step):
