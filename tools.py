@@ -21,6 +21,7 @@ from warnings import warn
 import gc
 
 # TODO: Compare gen_input_groups with SynchronousInputGroup
+#       - Unnecessary? fast_synchronous_input_gen
 # TODO: Major cleanup required
 # TODO: Put brian-dependent functions into a separate file
 
@@ -862,11 +863,18 @@ def times_to_bin_multi(spikes, dt=0.001*second, duration=None):
     return bintimes
 
 
-def PSTH(spikes, bin=0.001*second, dt=0.001*second, duration=None):
+def PSTH(spikes, bin, dt, duration=None):
     '''
     Similar to times_to_bin{_multi} though it doesn't discard multiple spikes
     in a single bin. Allows plotting of the PSTH. Returns the times of the bins
     and the number of spikes in each bin (much like a histogram).
+
+    Parameters
+    ----------
+    spikes : spike times (list or array)
+    bin : the length of the bin (in seconds)
+    dt : the temporal resolution of the spike times (e.g., simulation time step)
+    duration : defaults to time of last spike
 
     NB: Entire function can be replaced by a simple call to histogram with an
     appropriate bin size.
