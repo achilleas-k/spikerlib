@@ -52,7 +52,7 @@ def _find_corner_spikes(t, train, ibegin, start, end):
     return np.array([train[-1],end]), idts+ibegin
 
 
-def distance(stone, sttwo, start, end, nsamples):
+def distance(st_one, st_two, start, end, nsamples):
     """
 
     Computes the bivariate SPIKE distance of Kreuz et al. (2012) t1 and t2 are
@@ -61,13 +61,12 @@ def distance(stone, sttwo, start, end, nsamples):
     arrays t1, t2 and values ti, te are unit less
 
     """
-    BROKEN! FIX ME!!!
     t = np.linspace(start+(end-start)/nsamples, end, nsamples)
 
-    stone = np.insert(sttwo, 0, start)
-    stone = np.append(stone, end)
-    sttwo = np.insert(sttwo, 0, start)
-    sttwo = np.append(sttwo, end)
+    st_one = np.insert(st_one, 0, start)
+    st_one = np.append(st_one, end)
+    st_two = np.insert(st_two, 0, start)
+    st_two = np.append(st_two, end)
 
     # We compute the corner spikes for all the time instants we consider
     # corner_spikes is a 4 column matrix [t, tp1, tf1, tp2, tf2]
@@ -77,10 +76,10 @@ def distance(stone, sttwo, start, end, nsamples):
     ibegin_two = 0
     corner_spikes[:,0] = t
     for itc, tc in enumerate(t):
-       corner_spikes[itc,1:3], ibegin_t1 = _find_corner_spikes(tc, stone,
+       corner_spikes[itc,1:3], ibegin_t1 = _find_corner_spikes(tc, st_one,
                                                               ibegin_one,
                                                               start, end)
-       corner_spikes[itc,3:5], ibegin_t2 = _find_corner_spikes(tc, sttwo,
+       corner_spikes[itc,3:5], ibegin_t2 = _find_corner_spikes(tc, st_two,
                                                               ibegin_two,
                                                               start, end)
 
@@ -90,29 +89,29 @@ def distance(stone, sttwo, start, end, nsamples):
     xisi[:,1] = corner_spikes[:,4] - corner_spikes[:,3]
     norm_xisi = np.sum(xisi,axis=1)**2.0
 
-    # We now compute the smallest distance between the spikes in sttwo
-    # and the corner spikes of stone
-    # with np.tile(sttwo,(N,1)) we build a matrix :
-    # np.tile(sttwo,(N,1)) =   [sttwo sttwo sttwo]' -
-    #                       np.tile(reshape(corner_spikes,(N,1)), sttwo.size) =
+    # We now compute the smallest distance between the spikes in st_two
+    # and the corner spikes of st_one
+    # with np.tile(st_two,(N,1)) we build a matrix :
+    # np.tile(st_two,(N,1)) =   [st_two st_two st_two]' -
+    #                       np.tile(reshape(corner_spikes,(N,1)), st_two.size) =
     #                       [corner corner corner]'
 
-    dp1 = np.min(np.fabs(np.tile(sttwo,(nsamples,1))
+    dp1 = np.min(np.fabs(np.tile(st_two,(nsamples,1))
                          - np.tile(np.reshape(corner_spikes[:,1],(nsamples,1)),
-                                   sttwo.size)),
+                                   st_two.size)),
                  axis=1)
-    df1 = np.min(np.fabs(np.tile(sttwo,(nsamples,1))
+    df1 = np.min(np.fabs(np.tile(st_two,(nsamples,1))
                          - np.tile(np.reshape(corner_spikes[:,2],(nsamples,1)),
-                                   sttwo.size)),
+                                   st_two.size)),
                  axis=1)
-    # And the smallest distance between the spikes in stone and the corner spikes of sttwo
-    dp2 = np.min(np.fabs(np.tile(stone,(nsamples,1))
+    # And the smallest distance between the spikes in st_one and the corner spikes of st_two
+    dp2 = np.min(np.fabs(np.tile(st_one,(nsamples,1))
                          - np.tile(np.reshape(corner_spikes[:,3],
-                                              (nsamples,1)),stone.size)),
+                                              (nsamples,1)),st_one.size)),
                  axis=1)
-    df2 = np.min(np.fabs(np.tile(stone,(nsamples,1))
+    df2 = np.min(np.fabs(np.tile(st_one,(nsamples,1))
                          - np.tile(np.reshape(corner_spikes[:,4],(nsamples,1)),
-                                   stone.size)),
+                                   st_one.size)),
                  axis=1)
 
     xp1 = t - corner_spikes[:,1]
