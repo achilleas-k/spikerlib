@@ -62,7 +62,6 @@ def distance(st_one, st_two, start, end, nsamples):
 
     """
     t = np.linspace(start+(end-start)/nsamples, end, nsamples)
-
     st_one = np.insert(st_one, 0, start)
     st_one = np.append(st_one, end)
     st_two = np.insert(st_two, 0, start)
