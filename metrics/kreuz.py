@@ -159,7 +159,7 @@ def pairwise(spiketrains, ti, te, N):
     return t,d
 
 
-def pairwise_mp(spiketrains, ti, te, N):
+def pairwise_mp(spiketrains, start, end, N):
     """
     Calculates the multivariate distance (the instantaneous average over all
     the pairwise distances) using Python's multiprocessing.Pool() to
@@ -178,8 +178,8 @@ def pairwise_mp(spiketrains, ti, te, N):
     pool = multiprocessing.Pool()
     pool_results = pool.map(_all_dist_to_end,
                             zip(idx_all, itertools.repeat(spiketrains),
-                                itertools.repeat(ti),
-                                itertools.repeat(te),
+                                itertools.repeat(start),
+                                itertools.repeat(end),
                                 itertools.repeat(N)))
     pool.close()
     pool.join()
