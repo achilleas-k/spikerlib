@@ -127,9 +127,22 @@ def distance(stone, sttwo, start, end, nsamples):
 
     return t, inst_dist
 
+def _find_prev_spikes(t, spiketrains):
+    prv = []
+    for st in spiketrains:
+        prv.append(max(st[st <= t]))
+    return prv
 
-def pairwise(spiketrains, ti, te, N):
+def _find_next_spikes(t, spiketrains):
+    nxt = []
+    for st in spiketrains:
+        nxt.append(min(st[st > t]))
+    return nxt
+
+def multivariate(spiketrains, start, end, nsamples):
     """
+    Multivariate version as described in Kreuz et al., 2010.
+
     Parameters
     ==========
     spiketrains : is an array of spike time arrays
@@ -141,17 +154,45 @@ def pairwise(spiketrains, ti, te, N):
     N : the number of samples used to compute the distance
 
     spiketrains : is a list of arrays of shape (N, T) with N spike trains
-        The multivariate distance is the instantaneous average over all the
+    """
+    t = np.linspace(start+(end-start)/nsamples, end, nsamples)
+    d = np.zeros_like(t)
+    N = len(spiketrains)
+
+    for idx in range(N):
+        spiketrains[idx] = np.insert(spiketrains[idx], 0, start)
+        spiketrains[idx] = np.append(spiketrains[idx], end)
+
+    prev_spikes = np.zeros((nsamples, N+1))
+    next_spikes = np.zeros((nsamples, N+1))
+    for idx, ti in enumerate(t):
+        prev_spikes[idx] = _find_prev_spikes(ti, spiketrains)
+        next_spikes[idx] = _find_next_spikes(ti, spiketrains)
+
+def pairwise(spiketrains, start, end, nsamples):
+    """
+    Parameters
+    ==========
+    spiketrains : is an array of spike time arrays
+
+    start : the initial time of the recordings
+
+    end : the end time of the recordings
+
+    nsamples : the number of samples used to compute the distance
+
+    spiketrains is a list of arrays of shape (N, T) with N spike trains
+        The resulting distance is the instantaneous average over all the
         pairwise distances
     """
     # remove empty spike trains
     spiketrains = [sp for sp in spiketrains if len(sp)]
-    d = np.zeros((N,))
+    d = np.zeros((nsamples,))
     n_trains = len(spiketrains)
     t = 0
     for i, t1 in enumerate(spiketrains[:-1]):
         for t2 in spiketrains[i+1:]:
-            tij, dij = distance(t1, t2, ti, te, N)
+            tij, dij = distance(t1, t2, start, end, nsamples)
             if(i == 0):
                 t = tij  # The times are only dependent on ti, te, and N
             d = d + dij
