@@ -129,13 +129,13 @@ def distance(stone, sttwo, start, end, nsamples):
 def _find_prev_spikes(t, spiketrains):
     prv = []
     for st in spiketrains:
-        prv.append(max(st[st <= t]))
+        prv.append(max(st[st < t]))
     return prv
 
 def _find_next_spikes(t, spiketrains):
     nxt = []
     for st in spiketrains:
-        nxt.append(min(st[st > t]))
+        nxt.append(min(st[st >= t]))
     return nxt
 
 def multivariate(spiketrains, start, end, nsamples):
@@ -155,16 +155,17 @@ def multivariate(spiketrains, start, end, nsamples):
     t = np.linspace(start+(end-start)/nsamples, end, nsamples)
     N = len(spiketrains)
 
+    strains_se = []
     for idx in range(N):
-        spiketrains[idx] = np.insert(spiketrains[idx], 0, start)
-        spiketrains[idx] = np.append(spiketrains[idx], end)
+        newst = np.insert(spiketrains[idx], 0, start)
+        strains_se.append(np.append(newst, end))
 
     # previous and next spikes for each t (separate matrices)
     prev_spikes = np.zeros((nsamples, N))
     next_spikes = np.zeros((nsamples, N))
     for idx, ti in enumerate(t):
-        prev_spikes[idx] = _find_prev_spikes(ti, spiketrains)
-        next_spikes[idx] = _find_next_spikes(ti, spiketrains)
+        prev_spikes[idx] = _find_prev_spikes(ti, strains_se)
+        next_spikes[idx] = _find_next_spikes(ti, strains_se)
 
     # mean interval from t to previous spike on each spiketrain
     xp = np.mean(prev_spikes, axis=1)
