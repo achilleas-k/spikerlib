@@ -62,7 +62,6 @@ def distance(stone, sttwo, start, end, nsamples):
 
     """
     t = np.linspace(start+(end-start)/nsamples, end, nsamples)
-    d = np.zeros(t.shape)
 
     stone = np.insert(sttwo, 0, start)
     stone = np.append(stone, end)
@@ -147,30 +146,41 @@ def multivariate(spiketrains, start, end, nsamples):
     ==========
     spiketrains : is an array of spike time arrays
 
-    ti : the initial time of the recordings
+    start : the initial time of the recordings
 
-    te : the end time of the recordings
+    end : the end time of the recordings
 
-    N : the number of samples used to compute the distance
-
-    spiketrains : is a list of arrays of shape (N, T) with N spike trains
+    nsamples : the number of samples used to compute the distance
     """
     t = np.linspace(start+(end-start)/nsamples, end, nsamples)
-    d = np.zeros_like(t)
     N = len(spiketrains)
 
     for idx in range(N):
         spiketrains[idx] = np.insert(spiketrains[idx], 0, start)
         spiketrains[idx] = np.append(spiketrains[idx], end)
 
-    prev_spikes = np.zeros((nsamples, N+1))
-    next_spikes = np.zeros((nsamples, N+1))
+    # previous and next spikes for each t (separate matrices)
+    prev_spikes = np.zeros((nsamples, N))
+    next_spikes = np.zeros((nsamples, N))
     for idx, ti in enumerate(t):
         prev_spikes[idx] = _find_prev_spikes(ti, spiketrains)
         next_spikes[idx] = _find_next_spikes(ti, spiketrains)
 
+    # mean interval from t to previous spike on each spiketrain
+    xp = np.mean(prev_spikes, axis=1)
+    xf = np.mean(next_spikes, axis=1)
+    xisi = (np.mean(xp)+np.mean(xf))/2
+
+    sigmap = np.std(prev_spikes, axis=1)
+    sigmaf = np.std(next_spikes, axis=1)
+
+    mvdist = ((sigmap*xf)+(sigmaf*xp))/(xisi**2.0)
+    return t, mvdist
+
 def pairwise(spiketrains, start, end, nsamples):
     """
+    Calculate the instantaneous average over all the pairwise distances
+
     Parameters
     ==========
     spiketrains : is an array of spike time arrays
@@ -182,8 +192,6 @@ def pairwise(spiketrains, start, end, nsamples):
     nsamples : the number of samples used to compute the distance
 
     spiketrains is a list of arrays of shape (N, T) with N spike trains
-        The resulting distance is the instantaneous average over all the
-        pairwise distances
     """
     # remove empty spike trains
     spiketrains = [sp for sp in spiketrains if len(sp)]
