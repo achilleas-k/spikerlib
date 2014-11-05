@@ -36,24 +36,23 @@ import multiprocessing
 import itertools
 
 
-
-def _find_corner_spikes(t, train, ibegin, ti, te):
+def _find_corner_spikes(t, train, ibegin, start, end):
     """
     Return the times (t1,t2) of the spikes in train[ibegin:]
     such that t1 < t and t2 >= t
     """
     if(ibegin == 0):
-        tprev = ti
+        tprev = start
     else:
         tprev = train[ibegin-1]
     for idts, ts in enumerate(train[ibegin:]):
         if(ts >= t):
             return np.array([tprev, ts]), idts+ibegin
         tprev = ts
-    return np.array([train[-1],te]), idts+ibegin
+    return np.array([train[-1],end]), idts+ibegin
 
 
-def distance(t1, t2, ti, te, N):
+def distance(stone, sttwo, start, end, nsamples):
     """
 
     Computes the bivariate SPIKE distance of Kreuz et al. (2012) t1 and t2 are
@@ -61,61 +60,59 @@ def distance(t1, t2, ti, te, N):
     the values of the distance between time ti and te with N samples.  The
     arrays t1, t2 and values ti, te are unit less
 
-    TODO: Meaningful variable names
-
     """
-    t = np.linspace(ti+(te-ti)/N, te, N)
+    t = np.linspace(start+(end-start)/nsamples, end, nsamples)
     d = np.zeros(t.shape)
 
-    t1 = np.insert(t1, 0, ti)
-    t1 = np.append(t1, te)
-    t2 = np.insert(t2, 0, ti)
-    t2 = np.append(t2, te)
+    stone = np.insert(sttwo, 0, start)
+    stone = np.append(stone, end)
+    sttwo = np.insert(sttwo, 0, start)
+    sttwo = np.append(sttwo, end)
 
     # We compute the corner spikes for all the time instants we consider
     # corner_spikes is a 4 column matrix [t, tp1, tf1, tp2, tf2]
-    corner_spikes = np.zeros((N,5))
+    corner_spikes = np.zeros((nsamples,5))
 
-    ibegin_t1 = 0
-    ibegin_t2 = 0
+    ibegin_one = 0
+    ibegin_two = 0
     corner_spikes[:,0] = t
     for itc, tc in enumerate(t):
-       corner_spikes[itc,1:3], ibegin_t1 = _find_corner_spikes(tc, t1,
-                                                              ibegin_t1,
-                                                              ti, te)
-       corner_spikes[itc,3:5], ibegin_t2 = _find_corner_spikes(tc, t2,
-                                                              ibegin_t2,
-                                                              ti, te)
+       corner_spikes[itc,1:3], ibegin_t1 = _find_corner_spikes(tc, stone,
+                                                              ibegin_one,
+                                                              start, end)
+       corner_spikes[itc,3:5], ibegin_t2 = _find_corner_spikes(tc, sttwo,
+                                                              ibegin_two,
+                                                              start, end)
 
     #print corner_spikes
-    xisi = np.zeros((N,2))
+    xisi = np.zeros((nsamples,2))
     xisi[:,0] = corner_spikes[:,2] - corner_spikes[:,1]
     xisi[:,1] = corner_spikes[:,4] - corner_spikes[:,3]
     norm_xisi = np.sum(xisi,axis=1)**2.0
 
-    # We now compute the smallest distance between the spikes in t2
-    # and the corner spikes of t1
-    # with np.tile(t2,(N,1)) we build a matrix :
-    # np.tile(t2,(N,1)) =   [t2 t2 t2]' -
-    #                       np.tile(reshape(corner_spikes,(N,1)), t2.size) =
+    # We now compute the smallest distance between the spikes in sttwo
+    # and the corner spikes of stone
+    # with np.tile(sttwo,(N,1)) we build a matrix :
+    # np.tile(sttwo,(N,1)) =   [sttwo sttwo sttwo]' -
+    #                       np.tile(reshape(corner_spikes,(N,1)), sttwo.size) =
     #                       [corner corner corner]'
 
-    dp1 = np.min(np.fabs(np.tile(t2,(N,1))
-                         - np.tile(np.reshape(corner_spikes[:,1],(N,1)),
-                                   t2.size)),
+    dp1 = np.min(np.fabs(np.tile(sttwo,(nsamples,1))
+                         - np.tile(np.reshape(corner_spikes[:,1],(nsamples,1)),
+                                   sttwo.size)),
                  axis=1)
-    df1 = np.min(np.fabs(np.tile(t2,(N,1))
-                         - np.tile(np.reshape(corner_spikes[:,2],(N,1)),
-                                   t2.size)),
+    df1 = np.min(np.fabs(np.tile(sttwo,(nsamples,1))
+                         - np.tile(np.reshape(corner_spikes[:,2],(nsamples,1)),
+                                   sttwo.size)),
                  axis=1)
-    # And the smallest distance between the spikes in t1 and the corner spikes of t2
-    dp2 = np.min(np.fabs(np.tile(t1,(N,1))
+    # And the smallest distance between the spikes in stone and the corner spikes of sttwo
+    dp2 = np.min(np.fabs(np.tile(stone,(nsamples,1))
                          - np.tile(np.reshape(corner_spikes[:,3],
-                                              (N,1)),t1.size)),
+                                              (nsamples,1)),stone.size)),
                  axis=1)
-    df2 = np.min(np.fabs(np.tile(t1,(N,1))
-                         - np.tile(np.reshape(corner_spikes[:,4],(N,1)),
-                                   t1.size)),
+    df2 = np.min(np.fabs(np.tile(stone,(nsamples,1))
+                         - np.tile(np.reshape(corner_spikes[:,4],(nsamples,1)),
+                                   stone.size)),
                  axis=1)
 
     xp1 = t - corner_spikes[:,1]
@@ -126,9 +123,9 @@ def distance(t1, t2, ti, te, N):
     S1 = (dp1 * xf1 + df1 * xp1)/xisi[:,0]
     S2 = (dp2 * xf2 + df2 * xp2)/xisi[:,1]
 
-    d = (S1 * xisi[:,1] + S2 * xisi[:,0]) / (norm_xisi/2.0)
+    inst_dist = (S1 * xisi[:,1] + S2 * xisi[:,0]) / (norm_xisi/2.0)
 
-    return t,d
+    return t, inst_dist
 
 
 def pairwise(spiketrains, ti, te, N):
