@@ -61,6 +61,7 @@ def distance(stone, sttwo, start, end, nsamples):
     arrays t1, t2 and values ti, te are unit less
 
     """
+    BROKEN! FIX ME!!!
     t = np.linspace(start+(end-start)/nsamples, end, nsamples)
 
     stone = np.insert(sttwo, 0, start)
