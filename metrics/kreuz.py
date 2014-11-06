@@ -159,22 +159,23 @@ def multivariate(spiketrains, start, end, nsamples):
         newst = np.insert(spiketrains[idx], 0, start)
         strains_se.append(np.append(newst, end))
 
-    # previous and next spikes for each t (separate matrices)
-    prev_spikes = np.zeros((nsamples, N))
-    next_spikes = np.zeros((nsamples, N))
+    # different between t and previous and next spikes for each t
+    dprev_spikes = np.zeros((nsamples, N))
+    dnext_spikes = np.zeros((nsamples, N))
     for idx, ti in enumerate(t):
-        prev_spikes[idx] = _find_prev_spikes(ti, strains_se)
-        next_spikes[idx] = _find_next_spikes(ti, strains_se)
+        dprev_spikes[idx] = ti-_find_prev_spikes(ti, strains_se)
+        dnext_spikes[idx] = _find_next_spikes(ti, strains_se)-ti
 
-    # mean interval from t to previous spike on each spiketrain
-    xp = np.mean(prev_spikes, axis=1)
-    xf = np.mean(next_spikes, axis=1)
-    xisi = (np.mean(xp)+np.mean(xf))/2
+    # mean interval from t to previous/next spike on each spiketrain (over t)
+    meanp = np.mean(dprev_spikes, axis=1)
+    meanf = np.mean(dnext_spikes, axis=1)
+    # stdev interval from t to previous/next spike on each spiketrain (over t)
+    sigmap = np.std(dprev_spikes, axis=1)
+    sigmaf = np.std(dnext_spikes, axis=1)
+    # mean inter-spike interval around each t
+    xisi = meanp+meanf
 
-    sigmap = np.std(prev_spikes, axis=1)
-    sigmaf = np.std(next_spikes, axis=1)
-
-    mvdist = ((sigmap*xf)+(sigmaf*xp))/(xisi**2.0)
+    mvdist = ((sigmap*meanf)+(sigmaf*meanp))/(xisi**2)
     return t, mvdist
 
 def pairwise(spiketrains, start, end, nsamples):
