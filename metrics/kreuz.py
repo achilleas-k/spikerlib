@@ -294,3 +294,29 @@ def interval(inputspikes, outputspikes, samples=1, mp=True):
     return times, krdists
 
 
+def interval_multivariate(inputspikes, outputspikes, samples=1):
+    """
+    Calculates the multivariate SPIKE-distance in intervals defined
+    by a separate spike train. This function is used to calculate the distance
+    between *input* spike trains based on the interspike intervals of the
+    *output* spike train. The result is therefore the distance between the
+    input spikes that caused each response.
+
+    Parameters
+    ==========
+    inputspikes : A list or array of spike trains whose pairwise distance will
+        be calculated
+
+    outputspikes : A single spike train to be used to calculate the
+        intervals
+
+    samples : The number of samples to use to for each interval
+
+    """
+    times = []
+    krdists = []
+    for prv, nxt in zip(outputspikes[:-1], outputspikes[1:]):
+        krd = multivariate(inputspikes, prv, nxt, samples)
+        times.append(krd[0])
+        krdists.append(krd[1])
+    return times, krdists
