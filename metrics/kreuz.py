@@ -128,7 +128,7 @@ def distance(st_one, st_two, start, end, nsamples):
 def _find_prev_spikes(t, spiketrains):
     prv = []
     for st in spiketrains:
-        prv.append(max(st[st <= t]))
+        prv.append(max(st[st < t]))
     return prv
 
 def _find_next_spikes(t, spiketrains):
@@ -152,6 +152,8 @@ def multivariate(spiketrains, start, end, nsamples):
     nsamples : the number of samples used to compute the distance
     """
     t = np.linspace(start+(end-start)/nsamples, end, nsamples)
+    print(t[0])
+    print(t[-1])
     N = len(spiketrains)
 
     strains_se = []
