@@ -152,8 +152,6 @@ def multivariate(spiketrains, start, end, nsamples):
     nsamples : the number of samples used to compute the distance
     """
     t = np.linspace(start+(end-start)/nsamples, end, nsamples)
-    print(t[0])
-    print(t[-1])
     N = len(spiketrains)
 
     strains_se = []
