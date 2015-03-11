@@ -29,7 +29,7 @@ def CV(spiketrain):
         return 0.0
 
     avg_isi = np.mean(isi)
-    std_isi = np.std(isi)
+    std_isi = np.std(isi, ddof=1)
     return std_isi/avg_isi
 
 
