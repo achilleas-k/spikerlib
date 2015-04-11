@@ -30,8 +30,9 @@ try:
     import brian
     nobrian = False
     units = brian.units
-    msecond = brian.msecond
+    ms = msecond = brian.msecond
     volt = brian.volt
+    mV = mvolt = brian.mvolt
     second = brian.second
     hertz = brian.hertz
     PoissonGroup = brian.PoissonGroup
@@ -219,7 +220,7 @@ def gen_input_groups(N_in, f_in, S_in, sigma, duration):
 def poisson_times(f_in, duration):
     poisstrain = []
     spiketime = rnd.expovariate(f_in)
-    while spiketime < duration:
+    while float(spiketime) < float(duration):
         poisstrain.append(spiketime)
         spiketime += rnd.expovariate(f_in)
     return array(poisstrain)
@@ -332,11 +333,15 @@ def _calc_rate_of_change(X, Y):
 
 
 def calibrate_frequencies(nrndef, N_in, w_in, synchrony_conf, f_out,
-                          maxtries=-1):
+                          Vth=None, tau=None, maxtries=None):
     '''
     Calculates the input frequency required to produce the desired output rate
     by assuming a linear relationship and iteratively updating and retesting
     the input frequency on a short simulation.
+
+    If both Vth and tau are supplied, the initial frequency values are
+    calculated assuming the LIF equation, which should make the calibration
+    faster.
 
     Requires Brian.
 
@@ -347,6 +352,9 @@ def calibrate_frequencies(nrndef, N_in, w_in, synchrony_conf, f_out,
     w_in            : input weight
     synchrony_conf  : list of tuples (sync, jitter)
     f_out           : desired output frequency
+    Vth             : used to calculate initial value for search (optional)
+    tau             : used to calculate initial value for search (optional)
+    maxtries        : if supplied, limits the number of attempts (optional)
 
     Returns
     -------
@@ -356,14 +364,20 @@ def calibrate_frequencies(nrndef, N_in, w_in, synchrony_conf, f_out,
     if nobrian:
         print("Error: calibrate_frequencies requires Brian", file=sys.stderr)
         return -1
+    if maxtries is None:
+        maxtries = -1
     desired_out = f_out
     Nsims = len(synchrony_conf)
-    f_in = ones(Nsims)*10
+    if (Vth is None) and (tau is None):
+        f_in = f_out
+    else:
+        f_in = Vth/((1-exp(-1.0/(tau*f_out)))*N_in*w_in*tau)
+    f_in = ones(Nsims)*f_in
     actual_out = _run_calib(nrndef, N_in, f_in, w_in, synchrony_conf)
     # found = abs(desired_out-actual_out) < 2  # 2 Hz margin
     found = desired_out < actual_out
-    print("Calibrating %i simulations ..." % Nsims)
-    print("%i/%i ..." % (sum(found), Nsims), end="")
+    print("Calibrating {} simulations ...".format(Nsims))
+    print("{}/{}".format(sum(found), Nsims), end="")
     sys.stdout.flush()
     df_in = zeros(Nsims)+10
     ntry = 0
@@ -375,10 +389,11 @@ def calibrate_frequencies(nrndef, N_in, w_in, synchrony_conf, f_out,
                                 flatnonzero(~found))
         # found = found | (abs(desired_out-actual_out) < 2)
         found = found | (desired_out < actual_out)
-        print("\r%i/%i ..." % (sum(found), Nsims), end="")
+        print("\r{}/{} {}".format(sum(found), Nsims, "."*ntry), end="")
         sys.stdout.flush()
         found = found | (f_in > 500)
         f_in[f_in > 800] = 0
+    print("\r{}/{} {}".format(sum(found), Nsims, "."*ntry), end="")
     print("\nDone!")
     return f_in
 
@@ -428,7 +443,7 @@ def loadsim(simname):
         stm = array([])
 
     if ((not mem.size) and (not spiketrain.size) and (not stm.size)):
-        warn("No simulation data exists with name `%s` \n" % simname)
+        warn("No simulation data exists with name `{}` \n".format(simname))
 
     return mem, spiketrain, stm
 
