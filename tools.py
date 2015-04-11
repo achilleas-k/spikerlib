@@ -376,8 +376,8 @@ def calibrate_frequencies(nrndef, N_in, w_in, synchrony_conf, f_out,
     actual_out = _run_calib(nrndef, N_in, f_in, w_in, synchrony_conf)
     # found = abs(desired_out-actual_out) < 2  # 2 Hz margin
     found = desired_out < actual_out
-    print("Calibrating {} simulations ...".format(Nsims))
-    print("{}/{}".format(sum(found), Nsims), end="")
+    # print("Calibrating {} simulations ...".format(Nsims))
+    # print("{}/{}".format(sum(found), Nsims), end="")
     sys.stdout.flush()
     df_in = zeros(Nsims)+10
     ntry = 0
@@ -389,12 +389,12 @@ def calibrate_frequencies(nrndef, N_in, w_in, synchrony_conf, f_out,
                                 flatnonzero(~found))
         # found = found | (abs(desired_out-actual_out) < 2)
         found = found | (desired_out < actual_out)
-        print("\r{}/{} {}".format(sum(found), Nsims, "."*ntry), end="")
+        # print("\r{}/{} {}".format(sum(found), Nsims, "."*ntry), end="")
         sys.stdout.flush()
         found = found | (f_in > 500)
         f_in[f_in > 800] = 0
-    print("\r{}/{} {}".format(sum(found), Nsims, "."*ntry), end="")
-    print("\nDone!")
+    # print("\r{}/{} {}".format(sum(found), Nsims, "."*ntry), end="")
+    # print("\nDone!")
     return f_in
 
 
