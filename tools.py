@@ -368,29 +368,36 @@ def calibrate_frequencies(nrndef, N_in, w_in, synchrony_conf, f_out,
         maxtries = -1
     desired_out = f_out
     Nsims = len(synchrony_conf)
-    if (Vth is None) and (tau is None):
+    if (Vth is None) or (tau is None):
         f_in = f_out
     else:
         f_in = Vth/((1-exp(-1.0/(tau*f_out)))*N_in*w_in*tau)
     f_in = ones(Nsims)*f_in
     actual_out = _run_calib(nrndef, N_in, f_in, w_in, synchrony_conf)
-    # found = abs(desired_out-actual_out) < 2  # 2 Hz margin
-    found = desired_out < actual_out
+    # print("f_in:  "+", ".join(str(f) for f in f_in))
+    # print("f_out: "+", ".join(str(f) for f in actual_out))
+    found = abs(desired_out-actual_out) <= 0.1*desired_out  # 10% margin
     # print("Calibrating {} simulations ...".format(Nsims))
     # print("{}/{}".format(sum(found), Nsims), end="")
     sys.stdout.flush()
     df_in = zeros(Nsims)+10
+    prevdir = (df_in > 0)*1
     ntry = 0
     while not all(found) and (ntry != maxtries):
         ntry += 1
         df_in[found] = 0
-        f_in += df_in
+        newdir = 1*(actual_out < desired_out)-1*(actual_out > desired_out)
+        df_new = df_in*(newdir*prevdir)
+        df_new[newdir != prevdir] *= 0.5  # direction change
+        f_in += df_in*(actual_out < desired_out)
+        f_in -= df_in*(actual_out > desired_out)
         actual_out = _run_calib(nrndef, N_in, f_in, w_in, synchrony_conf,
                                 flatnonzero(~found))
-        # found = found | (abs(desired_out-actual_out) < 2)
-        found = found | (desired_out < actual_out)
+        # print("f_in:  "+", ".join(str(f) for f in f_in))
+        # print("f_out: "+", ".join(str(f) for f in actual_out))
+        found = found | (abs(desired_out-actual_out) <= 0.1*desired_out)
         # print("\r{}/{} {}".format(sum(found), Nsims, "."*ntry), end="")
-        sys.stdout.flush()
+        # sys.stdout.flush()
         found = found | (f_in > 500)
         f_in[f_in > 800] = 0
     # print("\r{}/{} {}".format(sum(found), Nsims, "."*ntry), end="")
