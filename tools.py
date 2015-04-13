@@ -34,7 +34,7 @@ try:
     volt = brian.volt
     mV = mvolt = brian.mvolt
     second = brian.second
-    hertz = brian.hertz
+    Hz = hertz = brian.hertz
     PoissonGroup = brian.PoissonGroup
     NeuronGroup = brian.NeuronGroup
     Network = brian.Network
@@ -374,28 +374,30 @@ def calibrate_frequencies(nrndef, N_in, w_in, synchrony_conf, f_out,
         f_in = Vth/((1-exp(-1.0/(tau*f_out)))*N_in*w_in*tau)
     f_in = ones(Nsims)*f_in
     actual_out = _run_calib(nrndef, N_in, f_in, w_in, synchrony_conf)
-    # print("f_in:  "+", ".join(str(f) for f in f_in))
-    # print("f_out: "+", ".join(str(f) for f in actual_out))
-    found = abs(desired_out-actual_out) <= 0.1*desired_out  # 10% margin
+    # print(("f_in:  "+"{:5.1f} "*len(f_in)).format(*f_in))
+    # print(("f_out: "+"{:5.1f} "*len(actual_out)).format(*actual_out))
+    found = abs(desired_out-actual_out) <= max(2*Hz, 0.1*desired_out)  # 10% margin
     # print("Calibrating {} simulations ...".format(Nsims))
     # print("{}/{}".format(sum(found), Nsims), end="")
     sys.stdout.flush()
-    df_in = zeros(Nsims)+10
-    prevdir = (df_in > 0)*1
+    fstep = zeros(Nsims)+10
+    prevdir = 1*(actual_out < desired_out)-1*(actual_out > desired_out)
     ntry = 0
     while not all(found) and (ntry != maxtries):
         ntry += 1
-        df_in[found] = 0
+        fstep[found] = 0
         newdir = 1*(actual_out < desired_out)-1*(actual_out > desired_out)
-        df_new = df_in*(newdir*prevdir)
-        df_new[newdir != prevdir] *= 0.5  # direction change
-        f_in += df_in*(actual_out < desired_out)
-        f_in -= df_in*(actual_out > desired_out)
+        fstep[newdir != prevdir] *= 0.5  # direction change
+        df_in = fstep*newdir
+        prevdir = newdir
+        f_in += df_in
         actual_out = _run_calib(nrndef, N_in, f_in, w_in, synchrony_conf,
                                 flatnonzero(~found))
-        # print("f_in:  "+", ".join(str(f) for f in f_in))
-        # print("f_out: "+", ".join(str(f) for f in actual_out))
-        found = found | (abs(desired_out-actual_out) <= 0.1*desired_out)
+        # print(("f_in:  "+"{:5.1f} "*len(f_in)).format(*f_in))
+        # print(("f_out: "+"{:5.1f} "*len(actual_out)).format(*actual_out))
+        # print()
+        found = found | (abs(desired_out-actual_out) <= max(2*Hz,
+                                                            0.1*desired_out))
         # print("\r{}/{} {}".format(sum(found), Nsims, "."*ntry), end="")
         # sys.stdout.flush()
         found = found | (f_in > 500)
