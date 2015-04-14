@@ -162,11 +162,13 @@ def multivariate(spiketrains, start, end, nsamples):
     # different between t and previous and next spikes for each t
     prev_spikes = np.zeros((nsamples, N))
     next_spikes = np.zeros((nsamples, N))
+    dprev_spikes = np.zeros((nsamples, N))
+    dnext_spikes = np.zeros((nsamples, N))
     for idx, ti in enumerate(t):
         prev_spikes[idx] = _find_prev_spikes(ti, strains_se)
         next_spikes[idx] = _find_next_spikes(ti, strains_se)
-    dprev_spikes = t-prev_spikes
-    dnext_spikes = next_spikes-t
+        dprev_spikes[idx] = ti-prev_spikes[idx]
+        dnext_spikes[idx] = next_spikes[idx]-ti
 
     # mean interval from t to previous/next spike on each spiketrain (over t)
     meanp = np.mean(dprev_spikes, axis=1)
