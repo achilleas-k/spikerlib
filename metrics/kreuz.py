@@ -139,7 +139,7 @@ def _find_next_spikes(t, spiketrains):
 
 def multivariate(spiketrains, start, end, nsamples):
     """
-    Multivariate version as described in Kreuz et al., 2010.
+    Multivariate version as described in Kreuz et al., 2011.
 
     Parameters
     ==========
@@ -160,18 +160,20 @@ def multivariate(spiketrains, start, end, nsamples):
         strains_se.append(np.append(newst, end))
 
     # different between t and previous and next spikes for each t
-    dprev_spikes = np.zeros((nsamples, N))
-    dnext_spikes = np.zeros((nsamples, N))
+    prev_spikes = np.zeros((nsamples, N))
+    next_spikes = np.zeros((nsamples, N))
     for idx, ti in enumerate(t):
-        dprev_spikes[idx] = ti-_find_prev_spikes(ti, strains_se)
-        dnext_spikes[idx] = _find_next_spikes(ti, strains_se)-ti
+        prev_spikes[idx] = _find_prev_spikes(ti, strains_se)
+        next_spikes[idx] = _find_next_spikes(ti, strains_se)
+    dprev_spikes = t-prev_spikes
+    dnext_spikes = next_spikes-t
 
     # mean interval from t to previous/next spike on each spiketrain (over t)
     meanp = np.mean(dprev_spikes, axis=1)
     meanf = np.mean(dnext_spikes, axis=1)
     # stdev interval from t to previous/next spike on each spiketrain (over t)
-    sigmap = np.std(dprev_spikes, axis=1)
-    sigmaf = np.std(dnext_spikes, axis=1)
+    sigmap = np.std(prev_spikes, axis=1)
+    sigmaf = np.std(next_spikes, axis=1)
     # mean inter-spike interval around each t
     xisi = meanp+meanf
 
@@ -261,13 +263,16 @@ def _all_dist_to_end(args):
     return times, distances
 
 
-def interval(inputspikes, outputspikes, samples=1, mp=True):
+def pairwise_interval(inputspikes, outputspikes, samples=1, mp=True):
     """
     Calculates the mean pairwise SPIKE-distance in intervals defined
     by a separate spike train. This function is used to calculate the distance
     between *input* spike trains based on the interspike intervals of the
     *output* spike train. The result is therefore the distance between the
     input spikes that caused each response.
+
+    NB: This is NOT the ISI distance. It is the spike distance calculated in
+    successive intervals.
 
     Parameters
     ==========
@@ -301,6 +306,9 @@ def interval_multivariate(inputspikes, outputspikes, samples=1):
     between *input* spike trains based on the interspike intervals of the
     *output* spike train. The result is therefore the distance between the
     input spikes that caused each response.
+
+    NB: This is NOT the ISI distance. It is the spike distance calculated in
+    successive intervals.
 
     Parameters
     ==========
