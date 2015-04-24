@@ -16,7 +16,7 @@ Spike train distance metrics. Includes code for calculating some of the most wid
 variability
 --
 Variability metrics commonly used for measuring neural spiking variability (CV, CV2, LV, IR).
-            
+
 tools
 --
 General purpose tools.
