@@ -31,6 +31,7 @@ J Neurophysiol 109, 1457-1472 (2013).
 The Matlab codes as well as more information can be found at http://www.fi.isc.cnr.it/users/thomas.kreuz/sourcecode.html.
 
 """
+from __future__ import division
 import numpy as np
 import multiprocessing
 import itertools
