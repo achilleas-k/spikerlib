@@ -738,7 +738,7 @@ def sync_inp(n, rate, s, sigma, dura, dt=0.0001*second):
     return spiketrains
 
 
-def poisson_spikes(dura, rate, dt=0.0001*second):
+def poisson_spikes(dura, rate, dt=0.0001):
     '''
     Generates a single spike train with exponentially distributed inter-spike
     intervals, i.e., a realisation of a Poisson process.
@@ -746,14 +746,11 @@ def poisson_spikes(dura, rate, dt=0.0001*second):
 
     Parameters
     ----------
-    dura : brian second (time)
-        Duration of spike train
+    dura : Duration of spike train (in seconds)
 
-    rate : brian Hz (frequency)
-        Spike rate
+    rate : Spike rate (in Hz)
 
-    dt : brian second (time)
-        Simulation time step (units: time)
+    dt : Simulation time step (in seconds)
 
     Returns
     -------
@@ -764,14 +761,14 @@ def poisson_spikes(dura, rate, dt=0.0001*second):
     spiketrain = []
     #   generate first interval
     while len(spiketrain) == 0:
-        newinterval = random.exponential(1./rate)*second
+        newinterval = random.exponential(1./rate)
         if newinterval < dt:
             newinterval = dt
         if newinterval < dura:
             spiketrain = [newinterval]
     #   generate intervals until we hit the duration
     while spiketrain[-1] < dura:
-        newinterval = random.exponential(1./rate)*second
+        newinterval = random.exponential(1./rate)
         if newinterval < dt:
             newinterval = dt
         spiketrain.append(spiketrain[-1]+newinterval)
